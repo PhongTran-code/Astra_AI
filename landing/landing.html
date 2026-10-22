@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Astra — AI coworker that finishes the work</title>
+<link rel="icon" type="image/svg+xml" href="assets/astra-mark.svg"/>
+<meta name="description" content="Astra is a local-first, governed AI coworker for your desktop. Security review, cloud posture, incident triage, everyday work — finished, not just chatted about."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css?v=14"/>
+<noscript><style>.nav,[data-hero],[data-fx],[data-fx="pop-group"] .prov,[data-fx="faq-group"] .faq-item,.reveal,.reveal-left,.reveal-right{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}.scroll-progress{display:none}</style></noscript>
+</head>
+<body>
+
+<!-- Ambient background: grid + drifting glow + grain -->
+<div class="bg-fx" aria-hidden="true">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <svg class="bg-grain" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+  </svg>
+</div>
+
+<!-- ═══════════════════ TOP NAV — floating pill ═══════════════════ -->
+<header class="nav" aria-label="Primary">
+  <div class="nav-pill" id="navPill">
+
+    <a href="#" class="nav-brand" aria-label="Astra home">
+      <img class="brand-logo-img" src="assets/astra-mark.svg" alt="Astra Logo" width="26" height="26" />
+      <span class="brand-name">Astra</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#showcase"     class="nav-link" data-nav="showcase">
+        <span class="nl-t" data-i18n="nav.showcase">Showcase</span>
+      </a>
+      <a href="#download"     class="nav-link" data-nav="download">
+        <span class="nl-t" data-i18n="nav.download">Download</span>
+      </a>
+      <a href="#compare"      class="nav-link" data-nav="compare">
+        <span class="nl-t" data-i18n="nav.compare">Why Astra</span>
+      </a>
+      <a href="#models"       class="nav-link" data-nav="models">
+        <span class="nl-t" data-i18n="nav.models">Models</span>
+      </a>
+      <a href="#integrations" class="nav-link" data-nav="integrations">
+        <span class="nl-t" data-i18n="nav.integrations">Integrations</span>
+      </a>
+      <a href="#faq"          class="nav-link" data-nav="faq">
+        <span class="nl-t" data-i18n="nav.faq">FAQ</span>
+      </a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="lang-toggle mono" id="langToggle" aria-label="Toggle language" title="Language">
+        <span data-lang-icon="en">EN</span>
+        <span data-lang-icon="vi">VI</span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg data-theme-icon="dark" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M15.5 12.6A6 6 0 0 1 7.4 4.5a.6.6 0 0 0-.9-.7 7.4 7.4 0 1 0 9.6 9.6.6.6 0 0 0-.6-.8Z"/></svg>
+        <svg data-theme-icon="light" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle fill="currentColor" cx="10" cy="10" r="3.4"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M4.2 15.8l1.4-1.4M14.4 5.6l1.4-1.4"/></g></svg>
+      </button>
+      <a class="gh-btn" href="https://github.com/PhongTran-code/Astra_AI" target="_blank" rel="noopener" aria-label="View on GitHub">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57 0-.28-.01-1.02-.02-2-3.33.72-4.03-1.6-4.03-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.5.99.1-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.81 5.63-5.48 5.92.42.36.81 1.1.81 2.22 0 1.6-.02 2.9-.02 3.29 0 .31.21.69.83.57A12 12 0 0 0 12 .3"/></svg>
+        <span class="gh-label">GitHub</span>
+      </a>
+      <a class="nav-download-btn mono" href="#download" data-nav="download">
+        <span class="nd-icon">↓</span>
+        <span data-i18n="nav.download">Download</span>
+      </a>
+      <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="nav-drawer" id="navDrawer" aria-hidden="true">
+    <a href="#showcase"     class="nd-link" data-nav="showcase"><span data-i18n="nav.showcase">Showcase</span></a>
+    <a href="#compare"      class="nd-link" data-nav="compare"><span data-i18n="nav.compare">Why Astra</span></a>
+    <a href="#models"       class="nd-link" data-nav="models"><span data-i18n="nav.models">Models</span></a>
+    <a href="#integrations" class="nd-link" data-nav="integrations"><span data-i18n="nav.integrations">Integrations</span></a>
+    <a href="#faq"          class="nd-link" data-nav="faq"><span data-i18n="nav.faq">FAQ</span></a>
+    <a href="#download"     class="nd-link nd-link-cta" data-nav="download"><span>↓</span> <span data-i18n="nav.download">Download App</span></a>
+    <div class="nav-drawer-foot">
+      <span>local-first · governed</span>
+      <span>v0.9</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════════════ HERO -->
+<section class="hero">
+  <div class="wrap hero-inner">
+
+    <h1 class="hero-title" data-hero="title" data-i18n-html="hero.title">
+      Your AI coworker that <em>actually</em><br>
+      finishes the work.
+    </h1>
+
+    <p class="hero-sub mono" data-hero="2" data-i18n="hero.sub">A desktop AI coworker. You give it real work — it hands back fixed code, finished docs, a triaged inbox. Not just chat.</p>
+
+    <div class="hero-ctas" data-hero="3">
+      <a class="btn btn-primary" href="#download" id="heroDownloadBtn">
+        <span>↓</span> <span class="hero-btn-text" data-i18n="cta.download">Download Astra Desktop</span>
+        <span class="btn-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="btn btn-outline mono" href="https://github.com/PhongTran-code/Astra_AI" target="_blank" rel="noopener">
+        <span aria-hidden="true">[ ]</span> <span data-i18n="cta.view">View source</span>
+      </a>
+    </div>
+    <span class="cta-note mono" data-hero="4" data-i18n="cta.platforms">macOS (Apple Silicon &amp; Intel) · Windows 10/11 · Ubuntu/Debian · 100% Free &amp; Open Source</span>
+
+    <div class="hero-stats mono" data-hero="5">
+      <div><b>25+</b><span data-i18n="stat.connectors">connectors</span></div>
+      <div class="sep">·</div>
+      <div><b>13</b><span data-i18n="stat.providers">model providers</span></div>
+      <div class="sep">·</div>
+      <div><b>0</b><span data-i18n="stat.locked">cloud lock-in</span></div>
+      <div class="sep">·</div>
+      <div><b>3-tier</b><span data-i18n="stat.gov">governance</span></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ DESKTOP SHOWCASE -->
+<section class="section" id="showcase">
+  <div class="wrap">
+    <header class="sec-head" data-fx="head-up">
+      <div class="eyebrow mono" data-i18n="showcase.idx"><span class="eb-dot"></span>01 / interactive showcase</div>
+      <h2 class="sec-title" data-i18n-html="showcase.title">A true desktop coworker,<br><span class="grad-text">not a fragile browser tab</span>.</h2>
+      <p class="sec-sub mono" data-i18n="showcase.sub">Watch Astra in motion on desktop: native workspace tree, transparent agent reasoning, human approval gate, and zero-compromise local governance.</p>
+
+      <div class="showcase-mode-switcher mono">
+        <button class="sc-mode-btn is-active" id="scModeVideo" data-mode="video">
+          <span data-i18n="showcase.mode.video">▶ Video Walkthrough</span>
+        </button>
+        <button class="sc-mode-btn" id="scModeSim" data-mode="sim">
+          <span data-i18n="showcase.mode.sim">⌨ Interactive Workstation</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="desktop-mockup" data-fx="zoom-tilt">
+      <div class="desktop-window">
+        <!-- Window Titlebar -->
+        <div class="desktop-titlebar">
+          <div class="dw-traffic">
+            <span class="dw-dot dw-close"></span>
+            <span class="dw-dot dw-min"></span>
+            <span class="dw-dot dw-max"></span>
+          </div>
+          <div class="dw-title mono">
+            <span>Astra Desktop — Workstation · workspace: /astra</span>
+          </div>
+          <div class="dw-status mono">
+            <span class="dw-live-dot"></span>
+            <span data-i18n="showcase.agent.status">Local Core Online · Sandboxed Session</span>
+          </div>
+        </div>
+
+        <!-- Video Player View (Primary Mode) -->
+        <div class="desktop-video-wrap" id="dwVideoView">
+          <video class="desktop-video" autoplay loop muted playsinline poster="assets/astra-showcase-poster.png">
+            <source src="assets/astra-showcase.webm" type="video/webm" />
+            <source src="assets/astra-showcase.mp4" type="video/mp4" />
+            <img src="assets/astra-showcase-poster.png" alt="Astra Desktop App Interface" />
+          </video>
+          <div class="video-overlay-ctrl mono">
+            <button class="video-playback-toggle" id="videoPlayPauseBtn" aria-label="Pause video">⏸ Pause</button>
+            <span class="video-badge">1080p 30fps Editorial Cut</span>
+          </div>
+        </div>
+
+        <!-- 3-Pane Interactive Simulation Body (Secondary Mode) -->
+        <div class="desktop-body" id="dwSimView" style="display: none;">
+          <!-- Sidebar -->
+          <aside class="desktop-sidebar">
+            <div class="ds-brand">
+              <span class="ds-avatar mono">AS</span>
+              <div class="ds-info">
+                <span class="ds-name">Astra DevTeam</span>
+                <span class="ds-sub mono">security-specialist</span>
+              </div>
+            </div>
+
+            <nav class="ds-nav mono" role="tablist" aria-label="Desktop Views">
+              <button class="ds-nav-item is-active" data-view="chat" role="tab" aria-selected="true">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span data-i18n="showcase.tab.chat">Tasks & Agent Chat</span>
+              </button>
+              <button class="ds-nav-item" data-view="inbox" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                <span data-i18n="showcase.tab.inbox">Approval Inbox</span>
+                <span class="ds-badge mono" data-i18n="showcase.badge">1 Pending</span>
+              </button>
+              <button class="ds-nav-item" data-view="audit" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span data-i18n="showcase.tab.audit">Audit Log Trail</span>
+              </button>
+            </nav>
+
+            <div class="ds-footer mono">
+              <span>port: 8765</span>
+              <span>v0.9.4</span>
+            </div>
+          </aside>
+
+          <!-- Main Stage with 3 Views -->
+          <div class="desktop-stage">
+            <!-- View 1: Tasks & Chat -->
+            <div class="dw-panel dw-panel-chat is-active" id="dwChatView">
+              <div class="dw-chat-head">
+                <div class="dw-ch-title mono">
+                  <span class="ch-agent" data-i18n="showcase.agent.role">Astra Security Specialist · claude-3.5-sonnet</span>
+                </div>
+                <span class="dw-ch-tag mono">task_id: #sec-8902</span>
+              </div>
+              <div class="dw-chat-content">
+                <div class="dw-msg dw-msg-user">
+                  <span class="dw-user-badge mono">user</span>
+                  <div class="dw-bubble">Scan repository for session hijacking and cryptographic vulnerabilities. Provide patch if verified.</div>
+                </div>
+                <div class="dw-msg dw-msg-agent">
+                  <span class="dw-agent-badge mono">astra</span>
+                  <div class="dw-bubble">
+                    <p data-i18n="showcase.task.plan">Analyzing session-fixation risk in src/auth/session.ts...</p>
+                    <div class="dw-subtask-list mono">
+                      <div class="st-item st-done">✓ [tool] semgrep scanner completed · 0 critical, 1 high, 0 low</div>
+                      <div class="st-item st-done">✓ [read] src/auth/session.ts inspected via AST graph</div>
+                      <div class="st-item st-warn">! [escalation] patch generated · requires human write approval</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="dw-chat-composer mono">
+                <span>astra › Ask follow-up question or redirect plan...</span>
+                <span class="composer-enter">⏎ Enter</span>
+              </div>
+            </div>
+
+            <!-- View 2: Approval Inbox -->
+            <div class="dw-panel dw-panel-inbox" id="dwInboxView">
+              <div class="dw-inbox-header">
+                <div class="ih-left">
+                  <span class="ih-badge-urgent mono">HIGH RISK</span>
+                  <h4 class="ih-title" data-i18n="showcase.ask.title">Human Approval Required</h4>
+                </div>
+                <span class="ih-meta mono">session #a41f · 14:22:47</span>
+              </div>
+              <div class="dw-inbox-body">
+                <p class="ih-desc" data-i18n="showcase.ask.desc">Astra prepared a security fix for session fixation. Applying this patch requires filesystem write authorization.</p>
+                <div class="ih-action-box mono">
+                  <span class="ih-act-label">Target File</span>
+                  <code class="ih-act-code" data-i18n="showcase.ask.action">Patch write: src/auth/session.ts (+14 / -8 lines)</code>
+                </div>
+                <!-- Diff View -->
+                <div class="ih-diff mono">
+                  <div class="diff-line diff-del">- session.regenerateId(); // insecure sync token fallback</div>
+                  <div class="diff-line diff-add">+ await crypto.regenerateSessionToken({ strictTtl: true, domainIsolation: true });</div>
+                  <div class="diff-line diff-info">@@ rescan status: 0 vulnerabilities remaining @@</div>
+                </div>
+                <!-- Buttons -->
+                <div class="ih-actions">
+                  <button class="ih-btn ih-btn-deny mono" id="demoDenyBtn" data-i18n="showcase.btn.deny">Deny & Revoke</button>
+                  <button class="ih-btn ih-btn-approve mono" id="demoApproveBtn" data-i18n="showcase.btn.approve">Approve & Execute</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- View 3: Audit Trail -->
+            <div class="dw-panel dw-panel-audit" id="dwAuditView">
+              <div class="dw-audit-head">
+                <h4 class="ah-title mono" data-i18n="showcase.audit.title">Cryptographic Action Ledger</h4>
+                <span class="ah-badge mono">sha256 sealed</span>
+              </div>
+              <div class="dw-audit-table mono">
+                <div class="at-row at-header">
+                  <span class="at-c1" data-i18n="showcase.audit.col1">Timestamp</span>
+                  <span class="at-c2" data-i18n="showcase.audit.col2">Action & Target</span>
+                  <span class="at-c3" data-i18n="showcase.audit.col3">Actor / Mode</span>
+                  <span class="at-c4" data-i18n="showcase.audit.col4">Provenance</span>
+                </div>
+                <div class="at-row">
+                  <span class="at-c1 c-dim">14:22:04</span>
+                  <span class="at-c2"><span class="c-key">read</span> repo/src/**</span>
+                  <span class="at-c3 c-ok">✓ auto</span>
+                  <span class="at-c4 c-dim">allowlist:code-read</span>
+                </div>
+                <div class="at-row">
+                  <span class="at-c1 c-dim">14:22:11</span>
+                  <span class="at-c2"><span class="c-key">tool</span> semgrep --config auto</span>
+                  <span class="at-c3 c-ok">✓ auto</span>
+                  <span class="at-c4 c-dim">allowlist:scanners</span>
+                </div>
+                <div class="at-row at-row-active">
+                  <span class="at-c1 c-dim">14:23:02</span>
+                  <span class="at-c2"><span class="c-key">write</span> src/auth/session.ts</span>
+                  <span class="at-c3 c-warn">✓ user</span>
+                  <span class="at-c4 c-ok">human:approved</span>
+                </div>
+                <div class="at-row">
+                  <span class="at-c1 c-dim">14:23:19</span>
+                  <span class="at-c2"><span class="c-key">shell</span> npm test</span>
+                  <span class="at-c3 c-ok">✓ user</span>
+                  <span class="at-c4 c-ok">exitCode:0 (142 passed)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ DOWNLOAD ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="download">
+  <div class="wrap">
+    <header class="sec-head" data-fx="head-left">
+      <div class="eyebrow mono" data-i18n="dl.idx"><span class="eb-dot"></span>02 / download desktop app</div>
+      <h2 class="sec-title" data-i18n-html="dl.title">Get Astra on your workstation.</h2>
+      <p class="sec-sub mono" data-i18n="dl.sub">Native desktop app with local engine. Available for macOS, Windows, and Ubuntu/Linux.</p>
+    </header>
+
+    <p class="sec-sub mono" role="status" data-i18n="dl.paused">Installer downloads are paused during development. You can still run Astra from source below.</p>
+
+    <div class="download-grid">
+      <!-- macOS Card -->
+      <div class="download-card" data-os="mac" data-fx="fan-left">
+        <div class="dl-os-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.76 1.05-1.81.93-2.88-.91.04-2.01.61-2.66 1.37-.58.67-1.09 1.74-.95 2.78 1.02.08 2.06-.51 2.68-1.27z"/>
+          </svg>
+        </div>
+        <div class="dl-badge-wrap">
+          <span class="dl-os-badge mono">macOS</span>
+        </div>
+        <h3 class="dl-os-title">macOS</h3>
+        <p class="dl-os-desc" data-i18n="dl.mac.desc">macOS 12.0 (Monterey) or later. Apple Silicon (M1/M2/M3/M4) &amp; Intel.</p>
+        <div class="dl-buttons">
+          <button type="button" class="btn btn-primary dl-btn-main" disabled>
+            <span class="dl-btn-icon">↓</span>
+            <span data-i18n="dl.mac.arm">Apple Silicon (.dmg)</span>
+          </button>
+          <button type="button" class="btn btn-outline dl-btn-sub mono" disabled>
+            <span data-i18n="dl.mac.intel">Intel x86_64 (.dmg)</span>
+          </button>
+        </div>
+        <!-- Package-manager install instructions are paused with public downloads. -->
+      </div>
+
+      <!-- Windows Card -->
+      <div class="download-card" data-os="win" data-fx="fan-up">
+        <div class="dl-os-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+          </svg>
+        </div>
+        <div class="dl-badge-wrap">
+          <span class="dl-os-badge mono">Windows</span>
+        </div>
+        <h3 class="dl-os-title">Windows</h3>
+        <p class="dl-os-desc" data-i18n="dl.win.desc">Windows 10 / 11 (64-bit). Native installer with automated path setup.</p>
+        <div class="dl-buttons">
+          <button type="button" class="btn btn-primary dl-btn-main" disabled>
+            <span class="dl-btn-icon">↓</span>
+            <span data-i18n="dl.win.exe">Windows Installer (.exe)</span>
+          </button>
+          <button type="button" class="btn btn-outline dl-btn-sub mono" disabled>
+            <span data-i18n="dl.win.zip">MSI Package (.msi)</span>
+          </button>
+        </div>
+        <!-- Package-manager install instructions are paused with public downloads. -->
+      </div>
+
+      <!-- Ubuntu / Linux Card -->
+      <div class="download-card" data-os="linux" data-fx="fan-right">
+        <div class="dl-os-icon">
+          <svg width="36" height="36" viewBox="-142.5 -142.5 285 285" fill="currentColor">
+            <circle cx="-96.3772" r="18.9215"/>
+            <path d="M-45.6059,68.395C-62.1655,57.3316-74.4844,40.4175-79.6011,20.6065-73.623,15.7354-69.8047,8.3164-69.8047,0-69.8047-8.3164-73.623-15.7354-79.6011-20.6065-74.4844-40.4175-62.1655-57.3316-45.6059-68.395L-31.7715-45.2212C-45.9824-35.2197-55.2754-18.7026-55.2754,0-55.2754,18.7026-45.9824,35.2197-31.7715,45.2212Z"/>
+            <circle cx="-96.3772" r="18.9215" transform="rotate(120)"/>
+            <path d="M-45.6059,68.395C-62.1655,57.3316-74.4844,40.4175-79.6011,20.6065-73.623,15.7354-69.8047,8.3164-69.8047,0-69.8047-8.3164-73.623-15.7354-79.6011-20.6065-74.4844-40.4175-62.1655-57.3316-45.6059-68.395L-31.7715-45.2212C-45.9824-35.2197-55.2754-18.7026-55.2754,0-55.2754,18.7026-45.9824,35.2197-31.7715,45.2212Z" transform="rotate(120)"/>
+            <circle cx="-96.3772" r="18.9215" transform="rotate(240)"/>
+            <path d="M-45.6059,68.395C-62.1655,57.3316-74.4844,40.4175-79.6011,20.6065-73.623,15.7354-69.8047,8.3164-69.8047,0-69.8047-8.3164-73.623-15.7354-79.6011-20.6065-74.4844-40.4175-62.1655-57.3316-45.6059-68.395L-31.7715-45.2212C-45.9824-35.2197-55.2754-18.7026-55.2754,0-55.2754,18.7026-45.9824,35.2197-31.7715,45.2212Z" transform="rotate(240)"/>
+          </svg>
+        </div>
+        <div class="dl-badge-wrap">
+          <span class="dl-os-badge mono">Ubuntu / Linux</span>
+        </div>
+        <h3 class="dl-os-title">Ubuntu / Linux</h3>
+        <p class="dl-os-desc" data-i18n="dl.linux.desc">Ubuntu 20.04+, Debian, Fedora, Arch. Available as .deb package or universal AppImage.</p>
+        <div class="dl-buttons">
+          <button type="button" class="btn btn-primary dl-btn-main" disabled>
+            <span class="dl-btn-icon">↓</span>
+            <span data-i18n="dl.linux.deb">Debian / Ubuntu (.deb)</span>
+          </button>
+          <button type="button" class="btn btn-outline dl-btn-sub mono" disabled>
+            <span data-i18n="dl.linux.appimage">AppImage (Universal)</span>
+          </button>
+        </div>
+        <!-- Package-manager install instructions are paused with public downloads. -->
+      </div>
+    </div>
+
+    <!-- Source fallback banner -->
+    <div class="dl-source-banner" data-fx="wipe-up">
+      <div class="dls-left">
+        <div class="dls-tag mono" data-i18n="dl.src.tag">POWER USERS &amp; DEVELOPERS</div>
+        <h4 class="dls-title" data-i18n="dl.src.title">Prefer running directly from source?</h4>
+        <p class="dls-desc" data-i18n="dl.src.desc">Clone repo, set up virtual environment, and launch the Electron frontend with Python coworker in seconds.</p>
+      </div>
+      <div class="dls-right mono">
+        <pre class="dls-code"><code><span class="c-dim"># Clone and launch Astra in 2 minutes</span>
+git clone https://github.com/PhongTran-code/Astra_AI.git
+cd Astra_AI &amp;&amp; python3 -m venv .venv
+source .venv/bin/activate &amp;&amp; pip install -e .
+python -m coworker.server</code></pre>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ COMPARE -->
+<section class="section" id="compare">
+  <div class="wrap">
+    <header class="sec-head" data-fx="head-right">
+      <div class="eyebrow mono" data-i18n="compare.idx"><span class="eb-dot"></span>03 / why astra</div>
+      <h2 class="sec-title" data-i18n-html="compare.title">Architected for safety & autonomy.<br><span class="grad-text">Not another raw wrapper</span>.</h2>
+      <p class="sec-sub mono" data-i18n="compare.sub">Why engineers and security leads choose Astra over web chat boxes or unguarded CLI scripts.</p>
+    </header>
+
+    <div class="compare-table-wrap" data-fx="curtain">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th class="th-feature" scope="col" data-i18n="compare.col.feature">Capability & Safety Guarantee</th>
+            <th class="th-cloud" scope="col" data-i18n="compare.col.cloud">Cloud Chatbots (ChatGPT / Claude)</th>
+            <th class="th-cli" scope="col" data-i18n="compare.col.cli">Raw CLI Agents (Unsandboxed)</th>
+            <th class="th-astra is-highlight" scope="col">
+              <span class="th-astra-badge" data-i18n="compare.col.astra">Astra AI Coworker</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-feature" data-i18n="compare.row1.feat">Execution Boundary</td>
+            <td class="td-cloud" data-i18n="compare.row1.cloud">Remote third-party cloud servers</td>
+            <td class="td-cli" data-i18n="compare.row1.cli">Local terminal, no perimeter</td>
+            <td class="td-astra is-highlight">
+              <span class="comp-check">✓</span> <strong data-i18n="compare.row1.astra">100% Local-first sandboxed runtime</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-feature" data-i18n="compare.row2.feat">Safety Enforcement</td>
+            <td class="td-cloud" data-i18n="compare.row2.cloud">Probabilistic prompt guardrails only</td>
+            <td class="td-cli" data-i18n="compare.row2.cli">Unchecked shell access, risky scripts</td>
+            <td class="td-astra is-highlight">
+              <span class="comp-check">✓</span> <strong data-i18n="compare.row2.astra">Architectural Hard Floors in code</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-feature" data-i18n="compare.row3.feat">Human-in-the-loop Governance</td>
+            <td class="td-cloud" data-i18n="compare.row3.cloud">No interactive action approval</td>
+            <td class="td-cli" data-i18n="compare.row3.cli">Terminal prompts interrupt every step</td>
+            <td class="td-astra is-highlight">
+              <span class="comp-check">✓</span> <strong data-i18n="compare.row3.astra">Approval Inbox + Earned Autonomy ladder</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-feature" data-i18n="compare.row4.feat">Audit & Action Ledger</td>
+            <td class="td-cloud" data-i18n="compare.row4.cloud">Proprietary server logs only</td>
+            <td class="td-cli" data-i18n="compare.row4.cli">Ephemeral terminal scrollback</td>
+            <td class="td-astra is-highlight">
+              <span class="comp-check">✓</span> <strong data-i18n="compare.row4.astra">Tamper-evident local provenance ledger</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-feature" data-i18n="compare.row5.feat">Model & Key Independence</td>
+            <td class="td-cloud" data-i18n="compare.row5.cloud">Vendor locked to single provider</td>
+            <td class="td-cli" data-i18n="compare.row5.cli">Basic API key support</td>
+            <td class="td-astra is-highlight">
+              <span class="comp-check">✓</span> <strong data-i18n="compare.row5.astra">BYOK (Claude, OpenAI, Local Ollama $0)</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-feature" data-i18n="compare.row6.feat">User Interface</td>
+            <td class="td-cloud" data-i18n="compare.row6.cloud">Single-column web chat view</td>
+            <td class="td-cli" data-i18n="compare.row6.cli">Terminal CLI only</td>
+            <td class="td-astra is-highlight">
+              <span class="comp-check">✓</span> <strong data-i18n="compare.row6.astra">Native 3-pane desktop workstation + CLI</strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ MODELS -->
+<section class="section" id="models">
+  <div class="wrap">
+    <header class="sec-head" data-fx="head-zoom">
+      <div class="eyebrow mono" data-i18n="models.idx"><span class="eb-dot"></span>04 / bring your own model</div>
+      <h2 class="sec-title" data-i18n-html="models.title">Model access is yours.<br>Switch anytime.</h2>
+      <p class="sec-sub mono" data-i18n="models.sub">Paste your API key, or run fully local with Ollama. No lock-in to anyone.</p>
+    </header>
+
+    <div class="providers" data-fx="pop-group">
+      <span class="prov"><img class="prov-logo" src="assets/logos/openai.svg"     alt="" width="18" height="18"/>OpenAI</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/anthropic.svg"  alt="" width="18" height="18"/>Anthropic</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/gemini.svg"     alt="" width="18" height="18"/>Google Gemini</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/deepseek.svg"   alt="" width="18" height="18"/>DeepSeek</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/mistral.svg"    alt="" width="18" height="18"/>Mistral</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/kimi.svg"       alt="" width="18" height="18"/>Kimi (Moonshot)</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/qwen.svg"       alt="" width="18" height="18"/>Qwen</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/minimax.svg"    alt="" width="18" height="18"/>MiniMax</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/grok.svg"       alt="" width="18" height="18"/>Grok (xAI)</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/glm.svg"        alt="" width="18" height="18"/>GLM (Z.ai)</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/byteplus.svg"   alt="" width="18" height="18"/>BytePlus Ark</span>
+      <span class="prov"><img class="prov-logo" src="assets/logos/volcengine.svg" alt="" width="18" height="18"/>Volcengine Ark</span>
+      <span class="prov prov-inkling"><span class="prov-logo prov-logo-dot"></span>Inkling</span>
+
+      <span class="prov prov-alt"><img class="prov-logo" src="assets/logos/together.svg"  alt="" width="18" height="18"/>+ Together</span>
+      <span class="prov prov-alt"><img class="prov-logo" src="assets/logos/fireworks.svg" alt="" width="18" height="18"/>+ Fireworks</span>
+
+      <span class="prov prov-local"><img class="prov-logo" src="assets/logos/ollama.svg" alt="" width="18" height="18"/>Ollama · fully local</span>
+    </div>
+
+    <p class="models-note mono reveal">
+      <span class="arrow">↳</span> <span data-i18n="models.note">A curated model list marks what's verified for tool-calling. Adding any model string works — at your own risk.</span>
+    </p>
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ INTEGRATIONS -->
+<section class="section" id="integrations">
+  <div class="wrap">
+    <header class="sec-head" data-fx="flip">
+      <div class="eyebrow mono" data-i18n="int.idx"><span class="eb-dot"></span>05 / integrations</div>
+      <h2 class="sec-title" data-i18n-html="int.title">25+ connectors.<br>Plus anything over MCP.</h2>
+      <p class="sec-sub mono" data-i18n="int.sub">Astra uses the tools you already use. No need to leave your flow.</p>
+    </header>
+
+    <div class="conn-marquee" data-fx="track-left" aria-label="Supported integrations">
+      <div class="conn-track">
+        <span class="conn-logo" title="GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57 0-.28-.01-1.02-.02-2-3.33.72-4.03-1.6-4.03-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.5.99.1-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.81 5.63-5.48 5.92.42.36.81 1.1.81 2.22 0 1.6-.02 2.9-.02 3.29 0 .31.21.69.83.57A12 12 0 0 0 12 .3"/></svg>
+          <span class="conn-name">GitHub</span>
+        </span>
+        <span class="conn-logo" title="Slack">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+          <span class="conn-name">Slack</span>
+        </span>
+        <span class="conn-logo" title="Jira">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78V8.2A4.35 4.35 0 0 0 22 12.55V2.84A.84.84 0 0 0 21.16 2H11.53zM6.77 6.8a4.35 4.35 0 0 0 4.35 4.34h1.78v1.79A4.35 4.35 0 0 0 17.24 17.28V7.63a.84.84 0 0 0-.83-.84H6.77zM2 11.6a4.35 4.35 0 0 0 4.35 4.35h1.78v1.79A4.35 4.35 0 0 0 12.48 22.08v-9.65a.84.84 0 0 0-.84-.83H2z"/></svg>
+          <span class="conn-name">Jira</span>
+        </span>
+        <span class="conn-logo" title="Notion">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466l1.823 1.447zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933l3.222-.186z"/></svg>
+          <span class="conn-name">Notion</span>
+        </span>
+        <span class="conn-logo" title="Linear">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M.403 13.795A12.01 12.01 0 0 0 10.204 23.596L.403 13.795zM.006 9.055l14.94 14.939a12.041 12.041 0 0 0 3.19-1.263L1.268 5.865A11.986 11.986 0 0 0 .006 9.055zm2.865-4.652L19.597 21.13a12.088 12.088 0 0 0 2.29-2.29L5.16 2.114a12.087 12.087 0 0 0-2.29 2.289zM6.883.982A12.001 12.001 0 0 0 23.019 17.117L6.883.982z"/></svg>
+          <span class="conn-name">Linear</span>
+        </span>
+        <span class="conn-logo" title="HubSpot">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.164 7.93V5.084a2.198 2.198 0 0 0 1.267-1.978v-.067A2.2 2.2 0 0 0 17.238.845h-.067a2.2 2.2 0 0 0-2.193 2.194v.067A2.199 2.199 0 0 0 16.244 5.083l.008.001v2.847a6.223 6.223 0 0 0-2.966 1.3l.017-.013-7.847-6.11c.05-.203.084-.436.084-.677a2.755 2.755 0 1 0-2.756 2.756c.531 0 1.023-.152 1.443-.412l-.012.007 7.72 6.011a6.253 6.253 0 0 0 .095 7.05L9.796 20.06a2.023 2.023 0 0 0-.581-.093a2.028 2.028 0 1 0 2.026 2.028l-.001-.032v.002c0-.203-.033-.398-.086-.583l.004.014 2.191-2.191c1.083.837 2.463 1.343 3.961 1.343 3.582 0 6.485-2.903 6.485-6.484 0-3.24-2.376-5.925-5.481-6.404l-.03-.004Zm-1.03 9.752l-.06-.001a3.352 3.352 0 1 1 .06.001Z"/></svg>
+          <span class="conn-name">HubSpot</span>
+        </span>
+        <span class="conn-logo" title="Microsoft Outlook">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.88 12.04q0 .45-.11.87-.1.41-.33.74-.22.33-.58.52-.37.2-.87.2t-.85-.2q-.35-.21-.57-.55-.22-.33-.33-.75-.1-.42-.1-.86t.1-.87q.1-.43.34-.76.22-.34.59-.54.36-.2.87-.2t.86.2q.35.21.57.55.22.34.31.77.1.43.1.88zM24 12v9.38q0 .46-.33.8-.33.32-.8.32H7.13q-.46 0-.8-.33-.32-.33-.32-.8V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h6.5V2.55q0-.44.3-.75.3-.3.75-.3h13.9q.44 0 .75.3.3.3.3.75V10.85l1.24.72h.01q.1.07.18.18.07.12.07.25zm-6-8.25v3h3v-3zm0 4.5v3h3v-3zm0 4.5v1.83l3.05-1.83zm-5.25-9v3h3.75v-3zm0 4.5v3h3.75v-3zm0 4.5v2.03l2.41 1.5 1.34-.8v-2.73zM9 3.75V6h2l.13.01.12.04v-2.3zM5.98 15.98q.9 0 1.6-.3.7-.32 1.19-.86.48-.55.73-1.28.25-.74.25-1.61 0-.83-.25-1.55-.24-.71-.71-1.24t-1.15-.83q-.68-.3-1.55-.3-.92 0-1.64.3-.71.3-1.2.85-.5.54-.75 1.3-.25.74-.25 1.63 0 .85.26 1.56.26.72.74 1.23.48.52 1.17.81.69.3 1.56.3zM7.5 21h12.39L12 16.08V17q0 .41-.3.7-.29.3-.7.3H7.5zm15-.13v-7.24l-5.9 3.54Z"/></svg>
+          <span class="conn-name">Outlook</span>
+        </span>
+        <span class="conn-logo" title="monday.com">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.279 15.487c-.784 0-1.512-.42-1.907-1.1a2.212 2.212 0 0 1 .009-2.222l3.71-6.31A2.208 2.208 0 0 1 6.088 4.75c.79.043 1.502.505 1.86 1.208a2.222 2.222 0 0 1-.101 2.238l-3.708 6.207a2.211 2.211 0 0 1-1.86 1.083zm7.653 0a2.204 2.204 0 0 1-1.9-1.087 2.219 2.219 0 0 1 0-2.222l3.706-6.31a2.209 2.209 0 0 1 1.983-1.113 2.208 2.208 0 0 1 1.868 1.199 2.222 2.222 0 0 1-.09 2.244L11.79 14.4a2.207 2.207 0 0 1-1.858 1.084zm7.796-.017a1.984 1.984 0 0 1-1.994-1.98 1.987 1.987 0 0 1 1.977-1.994h.017a1.987 1.987 0 1 1 0 3.974z"/></svg>
+          <span class="conn-name">monday</span>
+        </span>
+        <span class="conn-logo" title="Gmail">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+          <span class="conn-name">Gmail</span>
+        </span>
+        <span class="conn-logo" title="Google Calendar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 4H2v16h20V4zm-2 14H4V8h16v10zM9.5 15.5V11H8v1h-1v1h1v1.5c0 .55.45 1 1 1h1v-1H9.5v-.5zm5-4.5H12v1h2.5v1.25H13v1h1.5v1H12v1h2.5c.55 0 1-.45 1-1v-3.75c0-.55-.45-1-1-1z"/></svg>
+          <span class="conn-name">Calendar</span>
+        </span>
+        <span class="conn-logo conn-logo-native" title="Terminal">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>
+          <span class="conn-name">Terminal</span>
+        </span>
+        <span class="conn-logo conn-logo-native" title="Local files">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          <span class="conn-name">Local files</span>
+        </span>
+        <span class="conn-logo conn-logo-mcp" title="MCP">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5M3 17l9 5 9-5"/></svg>
+          <span class="conn-name">any MCP server</span>
+        </span>
+      </div>
+    </div>
+
+    <p class="conn-note mono reveal">
+      <span class="arrow">↳</span> <span data-i18n-html="int.note">Per-tool control. Any tool reachable over the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">Model Context Protocol</a> plugs in.</span>
+    </p>
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ PRIVACY -->
+<section class="section" id="privacy">
+  <div class="wrap privacy">
+
+    <div class="privacy-left" data-fx="mask">
+      <div class="eyebrow mono" data-i18n="priv.idx"><span class="eb-dot"></span>06 / privacy</div>
+      <h2 class="sec-title" data-i18n-html="priv.title">Local-first.<br>Your machine, your keys,<br>your data.</h2>
+      <p class="sec-sub mono" data-i18n="priv.sub">The full agent loop, conversations, connector tokens, and model keys all live on your machine.</p>
+
+      <ul class="privacy-list mono">
+        <li><span class="tick">[✓]</span> <span data-i18n="priv.li1">Agent loop runs on your device</span></li>
+        <li><span class="tick">[✓]</span> <span data-i18n="priv.li2">Conversations stay local</span></li>
+        <li><span class="tick">[✓]</span> <span data-i18n="priv.li3">Connector tokens in local secret store</span></li>
+        <li><span class="tick">[✓]</span> <span data-i18n="priv.li4">Model keys never leave your machine</span></li>
+        <li><span class="tick tick-note">[·]</span> <span data-i18n="priv.li5">Only cloud piece: OAuth broker (optional)</span></li>
+      </ul>
+    </div>
+
+    <div class="privacy-right" data-fx="orbit">
+      <div class="pdiagram active-agent" id="pdiagramRoot" data-active-node="agent" role="region" aria-label="Astra Local Security Enclave interactive architecture visualization">
+
+        <!-- Top Header & Controls -->
+        <div class="pdiagram-head">
+          <div class="pdiagram-title-wrap">
+            <span class="pdiagram-status-pulse"></span>
+            <span class="pdiagram-title mono">SECURE ENCLAVE v2.6</span>
+            <span class="pdiagram-badge mono">ISOLATED KERNEL</span>
+          </div>
+          <div class="pdiagram-scenario-pills mono" role="group" aria-label="Architecture scenarios">
+            <button type="button" class="pd-pill is-active" data-scenario="loop" aria-pressed="true">
+              <span class="pd-pill-num">01</span> Local Loop
+            </button>
+            <button type="button" class="pd-pill" data-scenario="gate" aria-pressed="false">
+              <span class="pd-pill-num">02</span> Human Gate
+            </button>
+            <button type="button" class="pd-pill" data-scenario="block" aria-pressed="false">
+              <span class="pd-pill-num">03</span> Hard Floor
+            </button>
+          </div>
+        </div>
+
+        <!-- Local Control Plane -->
+        <div class="pdiagram-stage">
+          <div class="stage-toolbar mono">
+            <span class="stage-kicker"><span class="stage-live-dot"></span>LOCAL CONTROL PLANE</span>
+            <span class="stage-meta">LOCAL / SEALED</span>
+          </div>
+
+          <div class="trust-canvas">
+            <span class="trust-boundary-label trust-label-local mono">LOCAL RUNTIME</span>
+            <span class="trust-boundary-label trust-label-policy mono">POLICY ENFORCED</span>
+
+            <div class="trust-connector connector-agent" aria-hidden="true"><span class="connector-pulse"></span></div>
+            <div class="trust-connector connector-tools" aria-hidden="true"><span class="connector-pulse"></span></div>
+            <div class="trust-connector connector-secret" aria-hidden="true"><span class="connector-pulse"></span></div>
+            <div class="trust-connector connector-audit" aria-hidden="true"><span class="connector-pulse"></span></div>
+
+            <button type="button" class="enode enode-agent enode-primary is-active" id="nodeAgent" data-node="agent" aria-label="Agent Loop Kernel" aria-pressed="true">
+              <span class="enode-topline mono"><span class="enode-index">01</span><span class="enode-kind">RUNTIME</span></span>
+              <span class="enode-name">Agent Core</span>
+              <span class="enode-meta mono">Python 3.12 · Runtime</span>
+              <span class="enode-status mono">ACTIVE <i>0ms</i></span>
+            </button>
+
+            <button type="button" class="enode enode-tools" id="nodeTools" data-node="tools" aria-label="System Tools and MCP" aria-pressed="false">
+              <span class="enode-topline mono"><span class="enode-index">02</span><span class="enode-kind">TOOLING</span></span>
+              <span class="enode-name">Tool Engine</span>
+              <span class="enode-meta mono">Sandbox FS · MCP</span>
+              <span class="enode-status mono">25+ <i>ISOLATED</i></span>
+            </button>
+
+            <button type="button" class="enode enode-secret" id="nodeSecret" data-node="secret" aria-label="Local Secret Store" aria-pressed="false">
+              <span class="enode-topline mono"><span class="enode-index">03</span><span class="enode-kind">VAULT</span></span>
+              <span class="enode-name">Secret Store</span>
+              <span class="enode-meta mono">OS Keychain · AES</span>
+              <span class="enode-status mono">ZERO-EXPORT</span>
+            </button>
+
+            <button type="button" class="enode enode-audit" id="nodeAudit" data-node="audit" aria-label="Provenance and Audit Ledger" aria-pressed="false">
+              <span class="enode-topline mono"><span class="enode-index">04</span><span class="enode-kind">PROVENANCE</span></span>
+              <span class="enode-name">Audit Ledger</span>
+              <span class="enode-meta mono">Immutable .jsonl</span>
+              <span class="enode-status mono">SHA-256 <i>SEALED</i></span>
+            </button>
+
+            <div class="core-lockup" aria-hidden="true">
+              <div class="core-disc">
+                <span class="core-name">ASTRA</span>
+                <span class="core-label mono">LOCAL CORE</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="gate-bridge" id="gateElement">
+            <div class="gate-card" id="gateBox">
+              <span class="gate-indicator-dot" id="gateDot"></span>
+              <span class="gate-copy">
+                <span class="gate-label mono" id="gateLabel">APPROVAL GATE</span>
+                <span class="gate-status mono" id="gateStatus" role="status" aria-live="polite">ARMED</span>
+              </span>
+              <span class="gate-lock mono" aria-hidden="true">↗</span>
+            </div>
+          </div>
+
+          <div class="external-zone">
+            <div class="external-head mono">
+              <span class="external-title">OUTBOUND SURFACES</span>
+              <span class="external-sub">ALLOWLISTED</span>
+            </div>
+            <div class="external-services mono">
+              <span class="external-service"><span class="external-service-dot"></span>Claude</span>
+              <span class="external-service"><span class="external-service-dot"></span>OpenAI</span>
+              <span class="external-service"><span class="external-service-dot"></span>Slack</span>
+              <span class="external-service"><span class="external-service-dot"></span>GitHub</span>
+              <span class="external-service"><span class="external-service-dot"></span>Gmail</span>
+              <span class="external-service"><span class="external-service-dot"></span>S3</span>
+            </div>
+          </div>
+        </div>
+
+
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ FAQ ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <header class="sec-head" data-fx="head-blur">
+      <div class="eyebrow mono" data-i18n="faq.idx"><span class="eb-dot"></span>07 / frequently asked questions</div>
+      <h2 class="sec-title" data-i18n-html="faq.title">Clear answers to critical questions.</h2>
+      <p class="sec-sub mono" data-i18n="faq.sub">Everything you need to know about security, architecture, data locality, and pricing.</p>
+    </header>
+
+    <div class="faq-accordion" data-fx="faq-group">
+      <div class="faq-item">
+        <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-1">
+          <span class="faq-q mono" data-i18n="faq.q1">Where does my data, codebase, and API keys go?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-body" id="faq-ans-1" hidden>
+          <div class="faq-inner" data-i18n="faq.a1">Everything stays on your physical device. Astra is built local-first: your workspace code, conversation history, connector credentials, and tool executions run locally. API keys are stored in your operating system's native credential keychain. If you use Ollama, zero network packets leave your computer.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-2">
+          <span class="faq-q mono" data-i18n="faq.q2">Is Astra completely free and open source?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-body" id="faq-ans-2" hidden>
+          <div class="faq-inner" data-i18n="faq.a2">Yes. Astra is 100% open source. There are no paid tier subscriptions, artificial feature gates, or hidden telemetry. You can run from source right now using your own provider keys or local open-weights models with zero expense.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-3">
+          <span class="faq-q mono" data-i18n="faq.q3">How does Astra prevent destructive operations like deleting files?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-body" id="faq-ans-3" hidden>
+          <div class="faq-inner" data-i18n="faq.a3">Unlike conventional AI agents that rely on prompt-based instructions, Astra enforces architectural Hard Floors directly in the backend runtime. Irreversible actions (filesystem writes, external webhook triggers, package publishing) mechanically escalate to your human approval inbox, regardless of prompt tampering or autonomy level.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-4">
+          <span class="faq-q mono" data-i18n="faq.q4">Can I connect custom internal tools and databases?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-body" id="faq-ans-4" hidden>
+          <div class="faq-inner" data-i18n="faq.a4">Yes. Astra includes 25+ verified connectors out-of-the-box and acts as a native host for the Model Context Protocol (MCP). Any MCP server exposing internal databases, proprietary APIs, or CLI tools can be integrated in seconds with fine-grained permission controls.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider reveal-line"></div></div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════ FOOTER -->
+<footer class="footer">
+  <div class="wrap footer-inner" data-fx="fade">
+    <div class="footer-brand">
+      <div class="brand">
+        <img class="brand-logo-img" src="assets/astra-mark.svg" alt="Astra Logo" width="26" height="26" />
+        <span class="brand-name">Astra</span>
+      </div>
+      <p class="mono footer-tag" data-i18n-html="footer.tag">AI coworker · desktop · local-first.<br>An AI coworker on your machine.</p>
+      <div class="footer-author-card">
+        <div class="footer-h mono" data-i18n="footer.author">Author</div>
+        <div class="footer-author-info">
+          <span class="footer-author-name">Tran Nguyen Thanh Phong</span>
+          <span class="footer-author-role mono" data-i18n="footer.role">AI Engineer</span>
+        </div>
+        <div class="footer-author-links">
+          <a href="https://github.com/PhongTran-code" target="_blank" rel="noopener" class="footer-social-link" aria-label="Tran Nguyen Thanh Phong on GitHub" title="GitHub">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57 0-.28-.01-1.02-.02-2-3.33.72-4.03-1.6-4.03-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.5.99.1-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.81 5.63-5.48 5.92.42.36.81 1.1.81 2.22 0 1.6-.02 2.9-.02 3.29 0 .31.21.69.83.57A12 12 0 0 0 12 .3"/></svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <div class="footer-h mono" data-i18n="footer.product">Product</div>
+        <a href="#models">Models</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-h mono" data-i18n="footer.source">Source</div>
+        <a href="https://github.com/PhongTran-code/Astra_AI" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/PhongTran-code/Astra_AI/blob/main/README.md" target="_blank" rel="noopener">README</a>
+        <a href="https://github.com/PhongTran-code/Astra_AI/blob/main/SECURITY.md" target="_blank" rel="noopener">Security</a>
+        <a href="https://github.com/PhongTran-code/Astra_AI/issues" target="_blank" rel="noopener">Issues</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-h mono" data-i18n="footer.builton">Built on</div>
+        <a href="https://github.com/andrewyng/aisuite" target="_blank" rel="noopener">aisuite</a>
+        <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">MCP</a>
+        <a href="https://tauri.app/" target="_blank" rel="noopener">Tauri</a>
+        <a href="https://ollama.com/" target="_blank" rel="noopener">Ollama</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-legal mono">
+    <span data-i18n="footer.legal1">© 2026 astra contributors</span>
+    <span class="sep">·</span>
+    <span data-i18n="footer.legal2">Personal build · source-first</span>
+    <span class="sep">·</span>
+    <span data-i18n="footer.legal3">Made with care, not hype</span>
+  </div>
+</footer>
+
+<script src="landing.js?v=5"></script>
+<script src="i18n.js?v=1"></script>
+</body>
+</html>

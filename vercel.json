@@ -1,0 +1,10 @@
+{
+  "outputDirectory": "landing",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/simulator", "destination": "/simulator.html" },
+    { "source": "/updates/latest.json", "destination": "/api/update" },
+    { "source": "/downloads/:path*", "destination": "/api/download?path=:path*" },
+    { "source": "/(.*)", "destination": "/$1" }
+  ]
+}

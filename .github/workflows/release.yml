@@ -1,0 +1,312 @@
+# Desktop release builds — macOS (.dmg, arm64 + Intel), Windows (.msi + NSIS .exe),
+# and Linux (.deb + AppImage).
+#
+# CI calls the SAME scripts developers run locally (packaging/build_dmg.sh and
+# build_windows.ps1); this file only provisions the toolchain (Node, Rust, a Python venv at
+# .venv with PyInstaller) and publishes the results.
+#
+# Trigger:
+#   - manual run only → builds development artifacts for download in Actions.
+# Tag pushes do not start app builds automatically. Public release publishing,
+# updater manifests, and Blob uploads are temporarily disabled below.
+#
+# Build artifacts retain versioned and stable names for development downloads in Actions.
+# The retained (disabled) release job can publish them again after distribution is configured.
+#
+# macOS signing + notarization: Tauri's bundler handles both during `tauri build` when the
+# APPLE_* env vars are present (import cert → sign app + sidecar with hardened runtime →
+# notarize via notarytool → staple). Driven by repo secrets:
+#   APPLE_CERTIFICATE            base64 .p12 (Developer ID Application cert + key)
+#   APPLE_CERTIFICATE_PASSWORD   the .p12 export password
+#   APPLE_SIGNING_IDENTITY       e.g. "Developer ID Application: Name (TEAMID)"
+#   APPLE_API_KEY_CONTENT        base64 App Store Connect API .p8 (notarytool)
+#   APPLE_API_KEY                the API key id
+#   APPLE_API_ISSUER             the API issuer id
+# When the secrets are absent (forks, scratch runs) the build degrades to unsigned —
+# installable via `xattr -cr`. Windows remains unsigned (Authenticode is a later step).
+
+name: Release
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest # Apple Silicon
+            slug: macos-arm64
+          # Intel macOS: macos-13 retired in Dec 2025; macos-15-intel replaced it and is
+          # the LAST x86_64 image Actions will offer (available until Aug 2027). Builds
+          # natively — the sidecar is a PyInstaller freeze, which cannot cross-compile.
+          - os: macos-15-intel
+            slug: macos-x64
+          - os: windows-latest
+            slug: windows
+          - os: ubuntu-22.04
+            slug: linux-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: surfaces/gui/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: surfaces/gui/src-tauri
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up the sidecar venv (.venv)
+        # The build scripts expect a venv at .venv with the package + PyInstaller.
+        # typer/tzdata are build-time-only (PyInstaller walks mcp.cli, which needs typer;
+        # tzdata ships zoneinfo for Windows). aisuite installs like any other dependency
+        # (git-pinned in pyproject.toml).
+        run: |
+          python -m venv .venv
+          if [ "$RUNNER_OS" = "Windows" ]; then VPY=.venv/Scripts/python; else VPY=.venv/bin/python; fi
+          "$VPY" -m pip install --upgrade pip
+          "$VPY" -m pip install -e ".[bedrock]" pyinstaller typer tzdata
+          "$VPY" -c "import aisuite, coworker"  # fail fast if either import breaks
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libfuse2 \
+            libasound2-dev
+
+      - name: npm ci
+        working-directory: surfaces/gui
+        run: npm ci
+
+      - name: Build .dmg (macOS)
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          # Auto-update artifact signing (minisign, separate from Apple signing). Absent →
+          # the build script skips updater artifacts with a warning (fork/scratch runs).
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          # Unset empty APPLE_* vars so runs without secrets stay cleanly unsigned
+          # (Tauri treats a present-but-empty var as a config error).
+          for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_API_KEY APPLE_API_ISSUER; do
+            [ -n "$(eval echo "\${$v:-}")" ] || unset "$v"
+          done
+          if [ -n "${APPLE_API_KEY_CONTENT:-}" ]; then
+            echo "$APPLE_API_KEY_CONTENT" | base64 -d > "$RUNNER_TEMP/AuthKey.p8"
+            export APPLE_API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          fi
+          unset APPLE_API_KEY_CONTENT
+          bash packaging/build_dmg.sh
+
+      - name: Build .msi + NSIS .exe (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: ./packaging/build_windows.ps1
+
+      - name: Build .deb + AppImage (Linux)
+        if: runner.os == 'Linux'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: bash packaging/build_linux.sh
+
+      - name: Stage artifacts (versioned + stable names)
+        run: |
+          mkdir -p out
+          BUNDLE=surfaces/gui/src-tauri/target/release/bundle
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp "$BUNDLE"/nsis/*.exe out/
+            cp "$BUNDLE"/nsis/*.exe out/Astra-windows-setup.exe
+            cp "$BUNDLE"/msi/*.msi out/
+            cp "$BUNDLE"/msi/*.msi out/Astra-windows.msi
+            # Updater signature for the NSIS installer (present only when the updater key
+            # secret is configured). The .sig signs CONTENT, so the stable rename is safe.
+            SIG=$(ls "$BUNDLE"/nsis/*.exe.sig 2>/dev/null | head -1 || true)
+            [ -n "$SIG" ] && cp "$SIG" out/Astra-windows-setup.exe.sig
+          elif [ "$RUNNER_OS" = "Linux" ]; then
+            cp "$BUNDLE"/deb/*.deb out/
+            cp "$BUNDLE"/deb/*.deb out/Astra-linux-amd64.deb
+            cp "$BUNDLE"/appimage/*.AppImage out/
+            cp "$BUNDLE"/appimage/*.AppImage out/Astra-linux-x86_64.AppImage
+            SIG=$(ls "$BUNDLE"/appimage/*.AppImage.sig 2>/dev/null | head -1 || true)
+            [ -n "$SIG" ] && cp "$SIG" out/Astra-linux-x86_64.AppImage.sig
+          else
+            cp "$BUNDLE"/dmg/*.dmg out/
+            cp "$BUNDLE"/dmg/*.dmg out/Astra-${{ matrix.slug }}.dmg
+            # macOS updater artifact: the signed .app tarball the installed app swaps in.
+            if [ -f "$BUNDLE"/macos/Astra.app.tar.gz ]; then
+              cp "$BUNDLE"/macos/Astra.app.tar.gz out/Astra-${{ matrix.slug }}.app.tar.gz
+              cp "$BUNDLE"/macos/Astra.app.tar.gz.sig out/Astra-${{ matrix.slug }}.app.tar.gz.sig
+            fi
+          fi
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.slug }}
+          path: out/*
+          if-no-files-found: error
+
+  # Re-enable only after the new download service, Blob store, and signing key are verified.
+  release:
+    if: ${{ false }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Determine release tag
+        id: tag_name
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF_NAME}"
+            case "$TAG" in
+              app-*) VERSION="${TAG#app-}" ;;
+              [0-9]*) VERSION="$TAG" ;;
+              *) echo "Unsupported release tag: $TAG" >&2; exit 1 ;;
+            esac
+          else
+            CONF_VERSION=$(python3 -c "import json; print(json.load(open('surfaces/gui/package.json'))['version'])")
+            TAG="$CONF_VERSION"
+            VERSION="$CONF_VERSION"
+          fi
+          CONF_VERSION=$(python3 -c "import json; print(json.load(open('surfaces/gui/package.json'))['version'])")
+          test "$VERSION" = "$CONF_VERSION" || {
+            echo "Release tag $TAG does not match package.json version $CONF_VERSION" >&2
+            exit 1
+          }
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Require signed public updater artifacts
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          test -n "$TAURI_SIGNING_PRIVATE_KEY" || { echo "Missing TAURI_SIGNING_PRIVATE_KEY" >&2; exit 1; }
+          test -n "$BLOB_READ_WRITE_TOKEN" || { echo "Missing BLOB_READ_WRITE_TOKEN" >&2; exit 1; }
+          for file in \
+            Astra-macos-arm64.app.tar.gz Astra-macos-arm64.app.tar.gz.sig \
+            Astra-macos-x64.app.tar.gz Astra-macos-x64.app.tar.gz.sig \
+            Astra-windows-setup.exe Astra-windows-setup.exe.sig \
+            Astra-linux-x86_64.AppImage Astra-linux-x86_64.AppImage.sig; do
+            test -s "dist/$file" || { echo "Missing signed updater artifact: dist/$file" >&2; exit 1; }
+          done
+
+      - name: Compose the auto-update manifest (latest.json)
+        # The desktop app polls the public /updates/latest.json endpoint. The tag must
+        # match package.json's version or installed apps would see a phantom update;
+        # signed artifacts are required before the release is published.
+        env:
+          ASTRA_DOWNLOAD_BASE_URL: ${{ vars.ASTRA_DOWNLOAD_BASE_URL }}
+        run: |
+          test -n "$ASTRA_DOWNLOAD_BASE_URL" || { echo "Missing ASTRA_DOWNLOAD_BASE_URL" >&2; exit 1; }
+          TAG="${{ steps.tag_name.outputs.tag }}"
+          python3 packaging/make_update_manifest.py \
+            --version "${{ steps.tag_name.outputs.version }}" --tag "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --download-base-url "${ASTRA_DOWNLOAD_BASE_URL%/}/releases/$TAG" \
+            --dist dist --out dist/latest.json \
+            --notes "Astra ${{ steps.tag_name.outputs.version }}"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_name.outputs.tag }}
+          draft: false
+          files: dist/*
+          generate_release_notes: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Vercel Blob SDK
+        run: npm install --prefix "$RUNNER_TEMP/blob-sdk" --no-package-lock --no-save --ignore-scripts @vercel/blob@latest
+
+      - name: Upload public installers and updater files to Vercel Blob
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tag_name.outputs.tag }}"
+          put() {
+            local file="$1"
+            local pathname="$2"
+            local max_age="$3"
+            (
+              cd "$RUNNER_TEMP/blob-sdk"
+              BLOB_FILE="$file" \
+              BLOB_PATHNAME="$pathname" \
+              BLOB_CACHE_MAX_AGE="$max_age" \
+              node --input-type=module -e '
+                import { createReadStream } from "node:fs";
+                import { put } from "@vercel/blob";
+
+                await put(process.env.BLOB_PATHNAME, createReadStream(process.env.BLOB_FILE), {
+                  access: "public",
+                  addRandomSuffix: false,
+                  allowOverwrite: true,
+                  cacheControlMaxAge: Number(process.env.BLOB_CACHE_MAX_AGE),
+                  multipart: true,
+                  token: process.env.BLOB_READ_WRITE_TOKEN,
+                });
+              '
+            )
+          }
+
+          for file in dist/*; do
+            name="${file##*/}"
+            [ "$name" = "latest.json" ] && continue
+            put "$file" "astra/releases/$TAG/$name" 31536000
+            case "$name" in
+              Astra-macos-arm64.dmg|Astra-macos-x64.dmg|Astra-windows-setup.exe|Astra-windows.msi|Astra-linux-amd64.deb|Astra-linux-x86_64.AppImage)
+                # Stable landing URLs are overwritten by each release, so keep their
+                # cache short enough that users do not receive an old installer for a year.
+                put "$file" "astra/stable/$name" 300
+                ;;
+            esac
+          done
+
+          # Publish the manifest last, after every versioned URL it references exists.
+          put dist/latest.json "astra/latest.json" 60

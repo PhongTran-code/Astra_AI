@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Astra — Finish the Work</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --paper: #f4f0e8;
+        --paper-deep: #e8e0d2;
+        --ink: #17191d;
+        --muted: #64645f;
+        --line: #b8b2a7;
+        --green: #20c77a;
+        --green-dark: #0e8250;
+        --blue: #6274e8;
+        --night: #151a21;
+        --night-2: #0d1218;
+        --night-line: #35404c;
+        --amber: #f0b94d;
+        --display: "Arial Black", Arial, sans-serif;
+        --body: Arial, Helvetica, sans-serif;
+        --mono: "Courier New", monospace;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        margin: 0;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      body { color: var(--ink); font-family: var(--body); }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .scene { position: absolute; inset: 0; overflow: hidden; }
+
+      .paper-fill {
+        position: absolute;
+        inset: 0;
+        background-color: var(--paper);
+        background-image:
+          linear-gradient(rgba(23, 25, 29, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(23, 25, 29, 0.05) 1px, transparent 1px);
+        background-size: 72px 72px;
+      }
+
+      .paper-fill::after {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 75% 20%, rgba(32, 199, 122, 0.16), transparent 32%);
+        content: "";
+      }
+
+      .dark-fill { position: absolute; inset: 0; background: var(--night); }
+
+      .dark-fill::before {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(244, 240, 232, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(244, 240, 232, 0.04) 1px, transparent 1px);
+        background-size: 72px 72px;
+        content: "";
+      }
+
+      .scene-index,
+      .scene-tag,
+      .micro,
+      .callout-label,
+      .frame-label,
+      .terminal-title,
+      .node-label,
+      .check-label {
+        font-family: var(--mono);
+        font-size: 20px;
+        letter-spacing: 0.12em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .scene-index { position: absolute; top: 74px; left: 88px; color: var(--muted); }
+
+      .scene-index::before {
+        display: inline-block;
+        width: 44px;
+        height: 4px;
+        margin: 0 18px 5px 0;
+        background: var(--green);
+        content: "";
+      }
+
+      .scene-index.light,
+      .scene-tag.light { color: #a9b2bc; }
+
+      .scene-tag { position: absolute; top: 78px; right: 88px; color: var(--muted); text-align: right; }
+
+      .rule {
+        position: absolute;
+        display: block;
+        height: 4px;
+        background: var(--ink);
+        transform-origin: left center;
+      }
+
+      .rule.green { background: var(--green); }
+      .rule.light { background: #e7edf1; }
+
+      .display {
+        font-family: var(--display);
+        font-weight: 900;
+        letter-spacing: -0.065em;
+        line-height: 1.02;
+      }
+
+      .body-copy { font-size: 30px; line-height: 1.28; }
+      .green-ink { color: var(--green-dark); }
+      .close-title .green-ink { color: var(--green); }
+
+      .marker-word { position: relative; display: inline-block; z-index: 0; }
+
+      .marker-word::before {
+        position: absolute;
+        z-index: -1;
+        right: -0.03em;
+        bottom: 0.04em;
+        left: -0.03em;
+        height: 0.48em;
+        background: var(--green);
+        content: "";
+        transform: rotate(-1.8deg);
+        transform-origin: left center;
+      }
+
+      .marker-word.blue::before { background: var(--blue); }
+
+      .bracket {
+        position: absolute;
+        width: 46px;
+        height: 46px;
+        border-color: currentColor;
+        border-style: solid;
+      }
+
+      .bracket.tl { border-width: 4px 0 0 4px; }
+      .bracket.tr { border-width: 4px 4px 0 0; }
+      .bracket.bl { border-width: 0 0 4px 4px; }
+      .bracket.br { border-width: 0 4px 4px 0; }
+
+      .crosshair { position: absolute; width: 40px; height: 40px; border: 3px solid var(--green); border-radius: 50%; }
+
+      .crosshair::before,
+      .crosshair::after { position: absolute; background: var(--green); content: ""; }
+
+      .crosshair::before { top: 16px; right: -14px; left: -14px; height: 3px; }
+      .crosshair::after { top: -14px; bottom: -14px; left: 16px; width: 3px; }
+
+      /* Scene 01 */
+      .open-copy { position: absolute; top: 228px; left: 164px; width: 1040px; }
+      .open-kicker { margin: 0 0 38px; color: var(--muted); }
+      .open-title { margin: 0; font-size: 132px; }
+      .open-title .line { display: block; }
+      .open-title .line:last-child { padding-left: 156px; }
+      .open-deck { width: 630px; margin: 52px 0 0 160px; color: var(--muted); }
+
+      .open-terminal {
+        position: absolute;
+        top: 280px;
+        right: 136px;
+        width: 468px;
+        padding: 28px 32px 34px;
+        border: 3px solid var(--ink);
+        background: #fffdf8;
+        box-shadow: 18px 18px 0 rgba(23, 25, 29, 0.12);
+      }
+
+      .terminal-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; border-bottom: 2px solid var(--line); }
+      .terminal-dots { display: flex; gap: 10px; }
+      .terminal-dots i { display: block; width: 15px; height: 15px; border: 2px solid var(--ink); border-radius: 50%; }
+      .terminal-title { color: var(--muted); font-size: 15px; letter-spacing: 0.08em; }
+
+      .terminal-line { margin: 28px 0 0; font-family: var(--mono); font-size: 24px; line-height: 1.8; }
+      .terminal-line .line { display: block; }
+      .terminal-line .mark { color: var(--green-dark); }
+
+      .terminal-result {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 10px 16px;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--mono);
+        font-size: 19px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .task-copy {
+        margin-top: 28px;
+        color: var(--ink);
+        font-family: var(--body);
+        font-size: 27px;
+        font-weight: 700;
+        line-height: 1.32;
+      }
+
+      .task-copy .line { display: block; }
+
+      .script-rail {
+        position: absolute;
+        right: 124px;
+        bottom: 42px;
+        left: 124px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        border-top: 2px solid var(--line);
+      }
+
+      .script-step {
+        position: relative;
+        padding-top: 12px;
+        color: #969188;
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .script-step.active { color: var(--ink); }
+
+      .script-step.active::before {
+        position: absolute;
+        top: -5px;
+        left: 0;
+        width: 54px;
+        height: 6px;
+        background: var(--green);
+        content: "";
+      }
+
+      .script-rail.dark { border-color: var(--night-line); }
+      .script-rail.dark .script-step { color: #68747f; }
+      .script-rail.dark .script-step.active { color: #f5d998; }
+      .script-rail.dark .script-step.active::before { background: var(--amber); }
+
+      .open-crosshair { top: 846px; right: 546px; }
+      .open-rule { right: 180px; bottom: 120px; width: 420px; }
+      .open-foot { position: absolute; bottom: 112px; left: 164px; color: var(--muted); }
+
+      /* Shared app frame */
+      .app-frame { position: absolute; overflow: hidden; border: 3px solid var(--ink); background: var(--night-2); box-shadow: 18px 20px 0 rgba(23, 25, 29, 0.14); }
+      .app-frame.dark-shadow { border-color: #dfe7ed; box-shadow: 20px 24px 0 rgba(0, 0, 0, 0.3); }
+
+      .app-topline {
+        display: flex;
+        height: 52px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        border-bottom: 2px solid var(--night-line);
+        color: #aab6c1;
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .app-dots { display: flex; gap: 8px; }
+      .app-dots span { display: block; width: 13px; height: 13px; border-radius: 50%; }
+      .app-dots span:nth-child(1) { background: #ff5f57; }
+      .app-dots span:nth-child(2) { background: #febc2e; }
+      .app-dots span:nth-child(3) { background: #28c840; }
+
+      .app-shot { display: block; width: 100%; height: calc(100% - 52px); object-fit: cover; object-position: center; }
+
+      .frame-label { position: absolute; padding: 10px 14px; background: var(--ink); color: var(--paper); font-size: 16px; letter-spacing: 0.08em; }
+      .frame-label.green { background: var(--green); color: var(--ink); }
+
+      /* Scene 02 */
+      .outcome-copy { position: absolute; top: 220px; left: 112px; width: 690px; }
+      .outcome-title { margin: 36px 0 0; font-size: 92px; }
+      .outcome-title .line { display: block; }
+      .outcome-deck { width: 530px; margin-top: 42px; color: var(--muted); }
+      .outcome-frame { top: 164px; right: 106px; width: 930px; height: 754px; }
+      .outcome-label { top: 178px; right: 890px; }
+
+      .outcome-connector { position: absolute; top: 248px; left: 702px; width: 208px; height: 170px; overflow: visible; }
+      .connector-path { fill: none; stroke: var(--green-dark); stroke-linecap: round; stroke-width: 4; }
+      .connector-note { position: absolute; top: 0; left: 72px; width: 176px; color: var(--green-dark); font-family: var(--mono); font-size: 18px; line-height: 1.35; text-transform: uppercase; }
+      .connector-note .line { display: block; }
+      .outcome-bracket-tl { top: 216px; right: 956px; color: var(--green-dark); }
+      .outcome-bracket-br { right: 88px; bottom: 104px; color: var(--blue); }
+
+      /* Scene 03 */
+      .work-copy { position: absolute; top: 202px; left: 124px; width: 632px; }
+      .work-title { margin: 32px 0 0; color: var(--ink); font-size: 84px; }
+      .work-title .line { display: block; }
+      .work-deck { width: 520px; margin-top: 42px; color: var(--muted); }
+      .work-list { display: grid; gap: 20px; margin-top: 52px; }
+
+      .work-step { display: grid; grid-template-columns: 66px 1fr; align-items: center; width: 520px; padding: 15px 16px 15px 0; border-top: 2px solid var(--ink); }
+      .work-step:last-child { border-bottom: 2px solid var(--ink); }
+      .step-no { color: var(--green-dark); font-family: var(--mono); font-size: 22px; }
+      .step-word { font-family: var(--display); font-size: 30px; letter-spacing: -0.03em; text-transform: uppercase; }
+
+      .work-frame { top: 140px; right: 110px; width: 940px; height: 800px; }
+      .work-note { position: absolute; right: 174px; bottom: 92px; padding: 14px 18px; background: var(--green); color: var(--ink); font-family: var(--mono); font-size: 18px; letter-spacing: 0.09em; text-transform: uppercase; }
+
+      /* Scene 04 */
+      .boundary-copy { position: absolute; top: 186px; left: 120px; width: 860px; color: #e9eef2; }
+      .boundary-title { margin: 32px 0 0; font-size: 92px; }
+      .boundary-title .line { display: block; }
+      .boundary-title .green-ink { color: var(--green); }
+      .boundary-deck { width: 630px; margin-top: 44px; color: #abb6c0; }
+
+      .boundary-quote { position: absolute; top: 716px; left: 124px; padding: 18px 22px; border-left: 8px solid var(--amber); background: var(--night-2); color: #f5d998; font-family: var(--mono); font-size: 20px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .boundary-frame { top: 166px; right: 118px; width: 720px; height: 606px; border-color: #52606d; }
+      .approval-stamp { position: absolute; top: 704px; right: 228px; padding: 16px 18px; border: 3px solid var(--amber); background: var(--night-2); color: var(--amber); font-family: var(--mono); font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .boundary-bracket-tl { top: 216px; right: 804px; color: var(--amber); }
+
+      .boundary-marker { position: absolute; top: 320px; left: 876px; width: 142px; height: 98px; border: 4px solid var(--amber); border-radius: 48% 52% 44% 56%; }
+      .boundary-marker::after { position: absolute; top: 86px; left: 92px; width: 116px; height: 4px; background: var(--amber); content: ""; transform: rotate(35deg); transform-origin: left center; }
+      .boundary-callout { position: absolute; top: 412px; left: 1008px; padding: 8px 12px; background: var(--night-2); color: var(--amber); font-family: var(--mono); font-size: 18px; line-height: 1.35; text-transform: uppercase; }
+      .boundary-callout .line { display: block; }
+
+      /* Scene 05 */
+      .loop-copy { position: absolute; top: 188px; left: 132px; }
+      .loop-title { width: 940px; margin: 34px 0 0; font-size: 88px; }
+      .loop-title .line { display: block; }
+      .loop-sub { width: 680px; margin-top: 42px; color: var(--muted); }
+
+      .pipeline { position: absolute; top: 584px; right: 126px; left: 126px; display: grid; grid-template-columns: repeat(5, 1fr); align-items: start; gap: 0; }
+      .pipeline-line { position: absolute; top: 38px; right: 112px; left: 112px; height: 6px; background: var(--paper-deep); transform-origin: left center; }
+      .pipeline-line-fill { display: block; width: 100%; height: 100%; background: var(--green); transform-origin: left center; }
+      .pipeline-node { position: relative; z-index: 1; text-align: center; }
+      .node-dot { width: 76px; height: 76px; margin: 0 auto 26px; border: 5px solid var(--ink); border-radius: 50%; background: var(--paper); }
+      .node-dot.green { border-color: var(--green-dark); background: var(--green); }
+      .node-dot.blue { border-color: var(--blue); }
+      .node-label { color: var(--muted); font-size: 16px; letter-spacing: 0.08em; }
+      .pipeline-caption { position: absolute; bottom: 98px; left: 132px; color: var(--green-dark); font-family: var(--mono); font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; }
+      .loop-crosshair { top: 142px; right: 200px; }
+
+      /* Scene 06 */
+      .result-copy { position: absolute; top: 192px; right: 150px; width: 706px; }
+      .result-title { margin: 36px 0 0; font-size: 88px; }
+      .result-title .line { display: block; }
+      .result-deck { width: 550px; margin-top: 38px; color: var(--muted); }
+      .result-frame { top: 164px; left: 118px; width: 800px; height: 684px; }
+      .result-checks { display: grid; gap: 20px; margin-top: 48px; }
+      .result-check { display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 12px; padding-bottom: 15px; border-bottom: 2px solid var(--line); }
+      .result-check::before { display: grid; width: 30px; height: 30px; place-items: center; border: 3px solid var(--green-dark); border-radius: 50%; color: var(--green-dark); content: "✓"; font-family: var(--mono); font-size: 18px; }
+      .check-label { color: var(--ink); font-size: 17px; letter-spacing: 0.08em; }
+      .result-stamp { position: absolute; right: 174px; bottom: 98px; padding: 15px 18px; border: 3px solid var(--green-dark); color: var(--green-dark); font-family: var(--mono); font-size: 18px; letter-spacing: 0.09em; }
+      .result-bracket-tl { top: 212px; left: 82px; color: var(--green-dark); }
+      .result-rule { top: 246px; right: 150px; width: 360px; }
+
+      /* Scene 07 */
+      .close-content { position: absolute; top: 190px; left: 166px; }
+      .close-mark { display: block; width: 104px; height: 104px; margin-bottom: 52px; }
+      .close-title { margin: 0; color: #edf2f5; font-size: 124px; }
+      .close-title .line { display: block; }
+      .close-title .line:last-child { padding-left: 180px; }
+      .close-sub { width: 650px; margin: 54px 0 0 184px; color: #a9b4bd; }
+      .close-sub .line,
+      .close-meta .line { display: block; }
+      .close-cta { position: absolute; right: 166px; bottom: 144px; padding: 22px 28px; background: var(--green); color: var(--ink); font-family: var(--mono); font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .close-meta { position: absolute; top: 142px; right: 170px; color: #8f9ba5; text-align: right; }
+      .close-rule { right: 166px; bottom: 278px; width: 480px; }
+      .close-ghost { position: absolute; right: -120px; bottom: -190px; color: rgba(244, 240, 232, 0.05); font-family: var(--display); font-size: 420px; letter-spacing: -0.1em; line-height: 0.7; }
+      .close-crosshair { top: 820px; left: 1030px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="45" data-width="1920" data-height="1080">
+      <section id="scene-open" class="scene clip" data-start="0" data-duration="5.2" data-track-index="0">
+        <div class="paper-fill" data-layout-ignore></div>
+        <div class="scene-index">01 / THE ASK</div>
+        <div class="scene-tag">ASTRA / EDITORIAL CUT</div>
+        <div class="open-copy">
+          <p class="open-kicker micro">THE PROBLEM / A REPLY IS NOT THE RESULT</p>
+          <div class="open-title display"><div class="line">A reply is not</div><div class="line">the <span class="marker-word">finish line.</span></div></div>
+          <p class="open-deck body-copy">Give Astra a real outcome: fix the bug, run the test, leave the trail.</p>
+        </div>
+        <div class="open-terminal">
+          <div class="terminal-head"><div class="terminal-dots"><i></i><i></i><i></i></div><span class="terminal-title">TASK / FROM USER</span></div>
+          <div class="task-copy" data-layout-ignore><div class="line">Find the insecure</div><div class="line">session-token fallback.</div><div class="line">Patch it. Run the test.</div></div>
+          <span class="terminal-result">→ send to Astra</span>
+        </div>
+        <div class="crosshair open-crosshair" data-layout-ignore></div>
+        <span class="rule green open-rule" data-layout-ignore></span>
+        <p class="open-foot micro">THE STORY / ASK → PLAN → ACT → APPROVE → FINISH</p>
+        <div class="script-rail" data-layout-ignore><span class="script-step active">01 Ask</span><span class="script-step">02 Plan</span><span class="script-step">03 Act</span><span class="script-step">04 Pause</span><span class="script-step">05 Approve</span><span class="script-step">06 Finish</span></div>
+      </section>
+
+      <section id="scene-outcome" class="scene clip" data-start="5.2" data-duration="6" data-track-index="0">
+        <div class="paper-fill" data-layout-ignore></div>
+        <div class="scene-index">02 / THE PLAN</div>
+        <div class="scene-tag">INPUT → OUTCOME</div>
+        <div class="outcome-copy">
+          <p class="micro">STEP 01 / MAKE THE ASK INSPECTABLE</p>
+          <div class="outcome-title display"><div class="line">First, Astra</div><div class="line">makes a <span class="marker-word blue">plan.</span></div></div>
+          <p class="outcome-deck body-copy">One clear ask becomes steps you can inspect before anything runs.</p>
+        </div>
+        <div class="app-frame outcome-frame">
+          <div class="app-topline"><div class="app-dots"><span></span><span></span><span></span></div><span>astra / workstation</span></div>
+          <img class="app-shot" src="assets/astra-app-real.png" alt="Astra workstation" />
+        </div>
+        <span class="frame-label green outcome-label">REAL WORK</span>
+        <svg class="outcome-connector" viewBox="0 0 208 170" aria-hidden="true" data-layout-ignore><path class="connector-path" d="M12 152 C32 96 70 78 94 58 C120 36 150 22 194 22" /></svg>
+        <div class="connector-note"><div class="line">intent → steps</div><div class="line">visible before action</div></div>
+        <span class="bracket tl outcome-bracket-tl" data-layout-ignore></span>
+        <span class="bracket br outcome-bracket-br" data-layout-ignore></span>
+        <div class="script-rail" data-layout-ignore><span class="script-step">01 Ask</span><span class="script-step active">02 Plan</span><span class="script-step">03 Act</span><span class="script-step">04 Pause</span><span class="script-step">05 Approve</span><span class="script-step">06 Finish</span></div>
+      </section>
+
+      <section id="scene-work" class="scene clip" data-start="11.2" data-duration="6" data-track-index="0">
+        <div class="paper-fill" data-layout-ignore></div>
+        <div class="scene-index">03 / THE WORK</div>
+        <div class="scene-tag">PLAN / TOOLS / CHECKS</div>
+        <div class="work-copy">
+          <p class="micro">STEP 02 / HAND THE WORK OVER</p>
+          <div class="work-title display"><div class="line">Then it</div><div class="line">does the <span class="green-ink">work.</span></div></div>
+          <p class="work-deck body-copy">It reads the repo, uses the tools, and checks the result in one local session.</p>
+          <div class="work-list">
+            <div class="work-step"><span class="step-no">01</span><span class="step-word">Read the repo</span></div>
+            <div class="work-step"><span class="step-no">02</span><span class="step-word">Run the tools</span></div>
+            <div class="work-step"><span class="step-no">03</span><span class="step-word">Check the result</span></div>
+          </div>
+        </div>
+        <div class="app-frame work-frame">
+          <div class="app-topline"><div class="app-dots"><span></span><span></span><span></span></div><span>local core / sandboxed session</span></div>
+          <img class="app-shot" src="assets/astra-showcase-ui-source.png" alt="Astra security workflow" />
+        </div>
+        <span class="work-note">one task · one trace · local by default</span>
+        <div class="script-rail" data-layout-ignore><span class="script-step">01 Ask</span><span class="script-step">02 Plan</span><span class="script-step active">03 Act</span><span class="script-step">04 Pause</span><span class="script-step">05 Approve</span><span class="script-step">06 Finish</span></div>
+      </section>
+
+      <section id="scene-boundary" class="scene clip" data-start="17.2" data-duration="6.6" data-track-index="0">
+        <div class="dark-fill" data-layout-ignore></div>
+        <div class="scene-index light">04 / THE PAUSE</div>
+        <div class="scene-tag light">HARD FLOOR / HUMAN APPROVAL</div>
+        <div class="boundary-copy">
+          <p class="micro light">STEP 03 / WHEN IT CAN CHANGE SOMETHING</p>
+          <div class="boundary-title display"><div class="line">When it matters,</div><div class="line">Astra <span class="green-ink">stops.</span></div></div>
+          <p class="boundary-deck body-copy">A consequential action cannot skip the human approval gate.</p>
+        </div>
+        <div class="app-frame boundary-frame dark-shadow">
+          <div class="app-topline"><div class="app-dots"><span></span><span></span><span></span></div><span>access control / safety</span></div>
+          <img class="app-shot" src="assets/astra-showcase-poster-boundary.png" alt="Astra approval gate" />
+        </div>
+        <span class="bracket tl boundary-bracket-tl" data-layout-ignore></span>
+        <span class="boundary-marker" data-layout-ignore></span>
+        <div class="boundary-callout"><div class="line">you decide</div><div class="line">before it acts</div></div>
+        <span class="approval-stamp">PAUSE / ASK FIRST</span>
+        <span class="boundary-quote">no prompt can talk its way past the gate</span>
+        <div class="script-rail dark" data-layout-ignore><span class="script-step">01 Ask</span><span class="script-step">02 Plan</span><span class="script-step">03 Act</span><span class="script-step active">04 Pause</span><span class="script-step">05 Approve</span><span class="script-step">06 Finish</span></div>
+      </section>
+
+      <section id="scene-loop" class="scene clip" data-start="23.8" data-duration="7.5" data-track-index="0">
+        <div class="paper-fill" data-layout-ignore></div>
+        <div class="scene-index">05 / THE APPROVAL</div>
+        <div class="scene-tag">REQUEST → RESULT</div>
+        <div class="loop-copy">
+          <p class="micro">STEP 04 / THE DECISION IS IN THE FLOW</p>
+          <div class="loop-title display"><div class="line">You approve</div><div class="line"><span class="marker-word">once.</span></div></div>
+          <p class="loop-sub body-copy">The work resumes from the same request — with the decision visible and recorded.</p>
+        </div>
+        <div class="pipeline">
+          <span class="pipeline-line" data-layout-ignore><span class="pipeline-line-fill"></span></span>
+          <div class="pipeline-node"><div class="node-dot green"></div><span class="node-label">ask</span></div>
+          <div class="pipeline-node"><div class="node-dot"></div><span class="node-label">plan</span></div>
+          <div class="pipeline-node"><div class="node-dot blue"></div><span class="node-label">act</span></div>
+          <div class="pipeline-node"><div class="node-dot"></div><span class="node-label">approve</span></div>
+          <div class="pipeline-node"><div class="node-dot green"></div><span class="node-label">finish</span></div>
+        </div>
+        <p class="pipeline-caption">one loop · visible at every step</p>
+        <div class="crosshair loop-crosshair" data-layout-ignore></div>
+        <div class="script-rail" data-layout-ignore><span class="script-step">01 Ask</span><span class="script-step">02 Plan</span><span class="script-step">03 Act</span><span class="script-step">04 Pause</span><span class="script-step active">05 Approve</span><span class="script-step">06 Finish</span></div>
+      </section>
+
+      <section id="scene-result" class="scene clip" data-start="31.3" data-duration="7.5" data-track-index="0">
+        <div class="paper-fill" data-layout-ignore></div>
+        <div class="scene-index">06 / THE FINISH</div>
+        <div class="scene-tag">OUTPUT / READY TO SHARE</div>
+        <div class="app-frame result-frame">
+          <div class="app-topline"><div class="app-dots"><span></span><span></span><span></span></div><span>astra / finished state</span></div>
+          <img class="app-shot" src="assets/astra-app-real.png" alt="Astra finished workspace" />
+        </div>
+        <span class="bracket tl result-bracket-tl" data-layout-ignore></span>
+        <div class="result-copy">
+          <p class="micro">STEP 05 / HAND BACK SOMETHING REAL</p>
+          <div class="result-title display"><div class="line">You get</div><div class="line">the <span class="marker-word">result.</span></div></div>
+          <p class="result-deck body-copy">A patch, a check, and a trace — not a promise to finish later.</p>
+          <div class="result-checks">
+            <div class="result-check"><span class="check-label">PATCH READY</span></div>
+            <div class="result-check"><span class="check-label">TESTS RUN</span></div>
+            <div class="result-check"><span class="check-label">AUDIT SAVED</span></div>
+          </div>
+        </div>
+        <span class="rule green result-rule" data-layout-ignore></span>
+        <span class="result-stamp">RESULT / IN HAND</span>
+        <div class="script-rail" data-layout-ignore><span class="script-step">01 Ask</span><span class="script-step">02 Plan</span><span class="script-step">03 Act</span><span class="script-step">04 Pause</span><span class="script-step">05 Approve</span><span class="script-step active">06 Finish</span></div>
+      </section>
+
+      <section id="scene-close" class="scene clip" data-start="38.8" data-duration="6.2" data-track-index="0">
+        <div class="dark-fill" data-layout-ignore></div>
+        <div class="scene-index light">07 / THE POINT</div>
+        <div class="scene-tag light" data-layout-ignore>LOCAL-FIRST / OPEN SOURCE</div>
+        <div class="close-content">
+          <img class="close-mark" src="assets/astra-mark.svg" alt="Astra" />
+          <div class="close-title display"><div class="line">Your AI coworker</div><div class="line">that <span class="green-ink">finishes.</span></div></div>
+          <div class="close-sub body-copy"><div class="line">Runs locally.</div><div class="line">Asks before it acts. Leaves a trail.</div></div>
+        </div>
+        <div class="close-meta micro"><div class="line">ASK → ACT → APPROVE → FINISH</div><div class="line">A DESKTOP AI COWORKER</div></div>
+        <span class="rule green close-rule" data-layout-ignore></span>
+        <span class="close-cta">DOWNLOAD FREE · OPEN SOURCE</span>
+        <div class="close-ghost" data-layout-ignore>ASTRA</div>
+        <div class="crosshair close-crosshair" data-layout-ignore></div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var tl = gsap.timeline({ paused: true, defaults: { overwrite: "auto" } });
+
+        function intro(targets, at, vars) {
+          var base = { opacity: 0, y: 34 };
+          tl.fromTo(targets, base, Object.assign({ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, vars || {}), at);
+        }
+
+        function slide(targets, at, x, y, duration, ease) {
+          tl.fromTo(targets, { opacity: 0, x: x, y: y }, { opacity: 1, x: 0, y: 0, duration: duration, ease: ease }, at);
+        }
+
+        function draw(targets, at, duration) {
+          tl.fromTo(targets, { scaleX: 0 }, { scaleX: 1, duration: duration, ease: "power2.out" }, at);
+        }
+
+        // 01 — hard editorial hook.
+        intro(".open-kicker", 0.2, { y: 18, duration: 0.42, ease: "power2.out" });
+        slide("#scene-open .open-title .line:first-child", 0.45, -90, 0, 0.7, "power3.out");
+        slide("#scene-open .open-title .line:last-child", 0.72, 80, 0, 0.78, "back.out(1.25)");
+        intro(".open-deck", 1.5, { y: 24, duration: 0.5, ease: "power2.out" });
+        tl.fromTo(".open-terminal", { opacity: 0, x: 120, rotation: 8, scale: 0.94 }, { opacity: 1, x: 0, rotation: 2.6, scale: 1, duration: 0.9, ease: "back.out(1.2)" }, 0.9);
+        tl.fromTo(".open-crosshair", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, 2.4);
+        draw(".open-rule", 2.65, 0.65);
+        intro(".open-foot", 3.1, { y: 14, duration: 0.4, ease: "power2.out" });
+        intro("#scene-open .script-rail", 2.9, { y: 12, duration: 0.42, ease: "power2.out" });
+
+        // 02 — the real product surface enters as evidence.
+        intro("#scene-outcome .micro", 5.35, { y: 18, duration: 0.42, ease: "power2.out" });
+        slide("#scene-outcome .outcome-title .line:first-child", 5.55, -70, 0, 0.65, "power3.out");
+        slide("#scene-outcome .outcome-title .line:last-child", 5.78, 70, 0, 0.65, "power3.out");
+        intro(".outcome-deck", 6.55, { y: 24, duration: 0.48, ease: "power2.out" });
+        tl.fromTo(".outcome-frame", { opacity: 0, x: 90, rotation: 6, scale: 0.92 }, { opacity: 1, x: 0, rotation: 1.1, scale: 1, duration: 0.95, ease: "back.out(1.12)" }, 5.65);
+        tl.fromTo(".outcome-frame .app-shot", { scale: 1.12, x: 36, y: 22 }, { scale: 1, x: 0, y: 0, duration: 1.05, ease: "power2.out" }, 5.85);
+        intro(".outcome-label", 6.2, { y: -20, duration: 0.38, ease: "back.out(1.3)" });
+        tl.fromTo(".outcome-connector .connector-path", { strokeDasharray: 420, strokeDashoffset: 420 }, { strokeDashoffset: 0, duration: 0.72, ease: "power2.out" }, 6.45);
+        intro(".connector-note", 7.05, { x: 16, y: 0, duration: 0.42, ease: "power2.out" });
+        tl.fromTo(".outcome-bracket-tl", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }, 7.2);
+        tl.fromTo(".outcome-bracket-br", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }, 8.0);
+        intro("#scene-outcome .script-rail", 7.65, { y: 12, duration: 0.42, ease: "power2.out" });
+
+        // 03 — a compact newsroom-like sequence of plan, tools, and checks.
+        intro("#scene-work .micro", 11.3, { y: 18, duration: 0.42, ease: "power2.out" });
+        slide("#scene-work .work-title .line:first-child", 11.52, -68, 0, 0.62, "power3.out");
+        slide("#scene-work .work-title .line:last-child", 11.78, 68, 0, 0.64, "power3.out");
+        intro(".work-deck", 12.48, { y: 20, duration: 0.46, ease: "power2.out" });
+        tl.fromTo(".work-frame", { opacity: 0, x: 100, rotation: 6, scale: 0.93 }, { opacity: 1, x: 0, rotation: -1.15, scale: 1, duration: 0.9, ease: "back.out(1.1)" }, 11.58);
+        tl.fromTo(".work-frame .app-shot", { scale: 1.1, x: -28, y: 20 }, { scale: 1, x: 0, y: 0, duration: 1, ease: "power2.out" }, 11.85);
+        tl.fromTo(".work-step", { opacity: 0, x: -44 }, { opacity: 1, x: 0, duration: 0.48, stagger: 0.17, ease: "power3.out" }, 13.08);
+        intro(".work-note", 14.25, { y: 18, duration: 0.4, ease: "back.out(1.25)" });
+        intro("#scene-work .script-rail", 14.35, { y: 12, duration: 0.42, ease: "power2.out" });
+
+        // 04 — a deliberate dark reset for the approval boundary.
+        intro("#scene-boundary .micro", 17.35, { y: 16, duration: 0.42, ease: "power2.out" });
+        slide("#scene-boundary .boundary-title .line:first-child", 17.6, -80, 0, 0.72, "power3.out");
+        slide("#scene-boundary .boundary-title .line:last-child", 17.94, 74, 0, 0.68, "back.out(1.25)");
+        intro(".boundary-deck", 18.72, { y: 26, duration: 0.5, ease: "power2.out" });
+        tl.fromTo(".boundary-frame", { opacity: 0, x: 110, rotation: 7, scale: 0.9 }, { opacity: 1, x: 0, rotation: 1.1, scale: 1, duration: 0.92, ease: "back.out(1.16)" }, 17.78);
+        tl.fromTo(".boundary-frame .app-shot", { scale: 1.18, x: -24, y: 26 }, { scale: 1, x: 0, y: 0, duration: 1.05, ease: "power2.out" }, 18.05);
+        tl.fromTo(".boundary-bracket-tl", { opacity: 0, scale: 0.65 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.4)" }, 18.45);
+        tl.fromTo(".boundary-marker", { opacity: 0, scale: 0.5, rotation: -16 }, { opacity: 1, scale: 1, rotation: -7, duration: 0.65, ease: "back.out(1.3)" }, 19.1);
+        intro(".boundary-callout", 19.55, { x: 20, y: 0, duration: 0.45, ease: "power2.out" });
+        tl.fromTo(".approval-stamp", { opacity: 0, scale: 0.55, rotation: -12 }, { opacity: 1, scale: 1, rotation: -4, duration: 0.62, ease: "back.out(1.25)" }, 20.0);
+        intro(".boundary-quote", 20.65, { x: -26, y: 0, duration: 0.48, ease: "power2.out" });
+        intro("#scene-boundary .script-rail", 20.8, { y: 12, duration: 0.42, ease: "power2.out" });
+
+        // 05 — the invisible architecture becomes a physical pipeline.
+        intro("#scene-loop .micro", 23.95, { y: 18, duration: 0.42, ease: "power2.out" });
+        slide("#scene-loop .loop-title .line:first-child", 24.18, -68, 0, 0.66, "power3.out");
+        slide("#scene-loop .loop-title .line:last-child", 24.5, 68, 0, 0.68, "back.out(1.25)");
+        intro(".loop-sub", 25.18, { y: 22, duration: 0.48, ease: "power2.out" });
+        draw(".pipeline-line-fill", 26.05, 0.95);
+        tl.fromTo(".pipeline-node", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.46, stagger: 0.17, ease: "back.out(1.25)" }, 26.05);
+        tl.fromTo(".node-dot.green, .node-dot.blue", { scale: 0.72 }, { scale: 1, duration: 0.5, stagger: 0.2, ease: "back.out(1.5)" }, 26.65);
+        intro(".pipeline-caption", 27.48, { y: 16, duration: 0.42, ease: "power2.out" });
+        tl.fromTo(".loop-crosshair", { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.35)" }, 28.0);
+        intro("#scene-loop .script-rail", 28.15, { y: 12, duration: 0.42, ease: "power2.out" });
+
+        // 06 — a tangible hand-off: screenshot, checks, and final stamp.
+        tl.fromTo(".result-frame", { opacity: 0, x: -90, rotation: -7, scale: 0.9 }, { opacity: 1, x: 0, rotation: -1, scale: 1, duration: 0.9, ease: "back.out(1.14)" }, 31.45);
+        tl.fromTo(".result-frame .app-shot", { scale: 1.14, x: 24, y: 18 }, { scale: 1, x: 0, y: 0, duration: 1.0, ease: "power2.out" }, 31.72);
+        tl.fromTo(".result-bracket-tl", { opacity: 0, scale: 0.65 }, { opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.4)" }, 32.05);
+        intro("#scene-result .micro", 31.72, { y: 18, duration: 0.42, ease: "power2.out" });
+        slide("#scene-result .result-title .line:first-child", 31.94, 72, 0, 0.65, "power3.out");
+        slide("#scene-result .result-title .line:last-child", 32.25, -70, 0, 0.66, "back.out(1.25)");
+        intro(".result-deck", 32.95, { y: 22, duration: 0.48, ease: "power2.out" });
+        tl.fromTo(".result-check", { opacity: 0, x: 34 }, { opacity: 1, x: 0, duration: 0.45, stagger: 0.16, ease: "power3.out" }, 33.6);
+        draw(".result-rule", 34.25, 0.65);
+        tl.fromTo(".result-stamp", { opacity: 0, scale: 0.65, rotation: -5 }, { opacity: 1, scale: 1, rotation: 2, duration: 0.6, ease: "back.out(1.24)" }, 34.58);
+        intro("#scene-result .script-rail", 34.72, { y: 12, duration: 0.42, ease: "power2.out" });
+
+        // 07 — quiet, high-contrast close.
+        tl.fromTo(".close-mark", { opacity: 0, y: -30, scale: 0.72 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.2)" }, 38.94);
+        slide("#scene-close .close-title .line:first-child", 39.35, -80, 0, 0.72, "power3.out");
+        slide("#scene-close .close-title .line:last-child", 39.7, 84, 0, 0.76, "back.out(1.25)");
+        intro(".close-sub", 40.62, { y: 22, duration: 0.48, ease: "power2.out" });
+        intro(".close-meta", 39.05, { y: -16, duration: 0.42, ease: "power2.out" });
+        draw(".close-rule", 41.08, 0.7);
+        tl.fromTo(".close-cta", { opacity: 0, x: 52, scale: 0.88 }, { opacity: 1, x: 0, scale: 1, duration: 0.62, ease: "back.out(1.25)" }, 41.45);
+        tl.fromTo(".close-crosshair", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.46, ease: "back.out(1.35)" }, 42.1);
+        tl.fromTo(".close-ghost", { opacity: 0, x: 90 }, { opacity: 1, x: 0, duration: 1.1, ease: "power2.out" }, 39.15);
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines.main = tl;
+      })();
+    </script>
+  </body>
+</html>

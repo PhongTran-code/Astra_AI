@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Astra Video Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1600px;
+    height: 900px;
+    background: #090c13;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: #e2e8f0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Window frame */
+  .window {
+    width: 1520px;
+    height: 840px;
+    background: #0d121d;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Titlebar */
+  .titlebar {
+    height: 48px;
+    background: #111726;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  .traffic {
+    display: flex;
+    gap: 8px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+
+  .title-text {
+    font-size: 13px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge-core {
+    font-size: 11px;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 3px 10px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot-pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+  }
+
+  /* App Body: 3 columns */
+  .app-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 280px 1fr 340px;
+    background: #090d16;
+  }
+
+  /* Left Sidebar */
+  .sidebar {
+    background: #0d121e;
+    border-right: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 20px;
+  }
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #0088ff, #00d8ff);
+    color: #fff; font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .user-name { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+  .user-role { font-size: 11px; color: #64748b; }
+
+  .nav-group-title {
+    font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 8px; padding-left: 8px;
+  }
+  .nav-list {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .nav-btn {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    border-radius: 8px; color: #94a3b8; font-size: 13px; font-weight: 500;
+    transition: all .15s ease;
+  }
+  .nav-btn.active {
+    background: rgba(0, 216, 255, 0.12);
+    color: #00d8ff;
+    border: 1px solid rgba(0, 216, 255, 0.25);
+    font-weight: 600;
+  }
+  .badge-count {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #f59e0b;
+    font-weight: 600;
+  }
+
+  /* Center: Chat & Task Stage */
+  .main-stage {
+    display: flex;
+    flex-direction: column;
+    background: #090d16;
+    position: relative;
+  }
+  .stage-header {
+    height: 54px;
+    border-bottom: 1px solid #1e293b;
+    background: #0d121e;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+  }
+  .stage-title { font-size: 14px; font-weight: 600; color: #f8fafc; display: flex; align-items: center; gap: 10px; }
+  .stage-model { font-size: 12px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 4px 10px; border-radius: 6px; }
+
+  .chat-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .msg-row {
+    display: flex;
+    gap: 14px;
+    max-width: 92%;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all .3s ease;
+  }
+  .msg-row.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .msg-user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 8px; font-size: 11px;
+    font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .msg-user .msg-avatar { background: #334155; color: #f8fafc; }
+  .msg-agent .msg-avatar { background: linear-gradient(135deg, #0284c7, #00d8ff); color: #fff; }
+
+  .bubble {
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .msg-user .bubble {
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #334155;
+  }
+  .msg-agent .bubble {
+    background: #0f172a;
+    color: #cbd5e1;
+    border: 1px solid #1e293b;
+    width: 100%;
+  }
+
+  /* Plan & Subtasks Execution UI */
+  .agent-plan-card {
+    background: #0a0f1d;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-size: 12.5px;
+  }
+  .subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    color: #94a3b8;
+    border-bottom: 1px dashed rgba(255,255,255,0.05);
+  }
+  .subtask-item:last-child { border-bottom: none; }
+  .st-status { font-weight: 700; }
+  .st-done { color: #10b981; }
+  .st-spin { color: #38bdf8; }
+  .st-warn { color: #f59e0b; }
+
+  /* Code diff preview card */
+  .diff-box {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    margin-top: 12px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+  .diff-head {
+    background: #0f172a;
+    padding: 8px 14px;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    color: #94a3b8;
+  }
+  .diff-code {
+    padding: 10px 14px;
+    line-height: 1.6;
+  }
+  .del-line { color: #f87171; background: rgba(239, 68, 68, 0.1); padding: 1px 4px; border-radius: 3px; }
+  .add-line { color: #4ade80; background: rgba(34, 197, 94, 0.1); padding: 1px 4px; border-radius: 3px; }
+
+  /* Smart Composer */
+  .composer {
+    height: 84px;
+    background: #0d121e;
+    border-top: 1px solid #1e293b;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .composer-input-wrap {
+    flex: 1;
+    position: relative;
+    background: #070a12;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 13.5px;
+    color: #f8fafc;
+  }
+  .composer-input-wrap.focused {
+    border-color: #00d8ff;
+    box-shadow: 0 0 0 2px rgba(0, 216, 255, 0.2);
+  }
+  .cursor-blink {
+    width: 2px;
+    height: 18px;
+    background: #00d8ff;
+    margin-left: 2px;
+    animation: blink .8s infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .btn-send {
+    background: linear-gradient(135deg, #0284c7, #00d8ff);
+    color: #000;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Right Sidebar: Inspector & Human Approval Card */
+  .inspector {
+    background: #0d121e;
+    border-left: 1px solid #1e293b;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .insp-title {
+    font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase;
+    letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;
+  }
+  .approval-card {
+    background: #0f172a;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 12px;
+    padding: 18px 16px;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.08);
+    position: relative;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all .35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .approval-card.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .appr-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; color: #f59e0b;
+    background: rgba(245, 158, 11, 0.15); padding: 3px 8px; border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .appr-head { font-size: 13px; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+  .appr-desc { font-size: 11.5px; color: #94a3b8; line-height: 1.5; margin-bottom: 14px; }
+  .appr-actions { display: flex; gap: 8px; }
+  .btn-deny {
+    flex: 1; background: #1e293b; border: 1px solid #334155; color: #cbd5e1;
+    padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  }
+  .btn-approve {
+    flex: 1; background: #10b981; border: 1px solid #10b981; color: #022c22;
+    padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+    transition: all .15s ease;
+  }
+  .btn-approve.clicked {
+    background: #059669;
+    color: #fff;
+    transform: scale(0.96);
+  }
+
+  /* Animated Virtual Cursor */
+  .cursor-hand {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    z-index: 1000;
+    pointer-events: none;
+    transition: all .6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: translate(-2px, -2px);
+  }
+  .cursor-hand svg {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+  }
+
+  /* Bottom status ticker */
+  .hud-banner {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    background: rgba(13, 18, 30, 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 216, 255, 0.35);
+    border-radius: 10px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    z-index: 90;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .hud-icon { width: 10px; height: 10px; border-radius: 50%; background: #00d8ff; box-shadow: 0 0 10px #00d8ff; }
+  .hud-title { font-weight: 700; color: #fff; }
+  .hud-desc { color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<div class="window">
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <div class="traffic">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+    </div>
+    <div class="title-text mono">
+      <span>Astra Workstation — Native Local Desktop AI Coworker</span>
+    </div>
+    <div class="badge-core mono">
+      <span class="dot-pulse"></span>
+      <span>Local Sandbox Core · Port 8765</span>
+    </div>
+  </div>
+
+  <!-- App Body -->
+  <div class="app-body">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="user-profile">
+        <div class="avatar">AS</div>
+        <div>
+          <div class="user-name">Astra DevTeam</div>
+          <div class="user-role mono">governed · local-first</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="nav-group-title mono">Workspaces</div>
+        <div class="nav-list mono">
+          <div class="nav-btn active">
+            <span>📁</span> <span>/astra</span>
+          </div>
+          <div class="nav-btn">
+            <span>📁</span> <span>/cloud-infra</span>
+          </div>
+          <div class="nav-btn">
+            <span>📁</span> <span>/client-audit</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <div class="nav-group-title mono">Navigation</div>
+        <div class="nav-list mono">
+          <div class="nav-btn active">
+            <span>💬</span> <span>Chat & Tasks</span>
+          </div>
+          <div class="nav-btn" id="navInboxBtn">
+            <span>📥</span> <span>Approval Inbox</span>
+            <span class="badge-count" id="navInboxCount" style="display: none;">1</span>
+          </div>
+          <div class="nav-btn">
+            <span>📜</span> <span>Audit Trail</span>
+          </div>
+          <div class="nav-btn">
+            <span>⚙️</span> <span>Settings</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Stage -->
+    <main class="main-stage">
+      <div class="stage-header">
+        <div class="stage-title">
+          <span>Session: #sec-8902 · Session Fixation Vulnerability Patch</span>
+        </div>
+        <div class="stage-model mono">claude-3.5-sonnet (BYOK)</div>
+      </div>
+
+      <div class="chat-scroll" id="chatScroll">
+        <!-- Message 1: User Prompt -->
+        <div class="msg-row msg-user" id="userMsg">
+          <div class="msg-avatar mono">ME</div>
+          <div class="bubble" id="userBubble">
+            Quét mã nguồn xác thực, tìm lỗ hổng Session Fixation và tạo bản vá bảo mật chuẩn NIST.
+          </div>
+        </div>
+
+        <!-- Message 2: Agent Reasoning & Subtasks -->
+        <div class="msg-row msg-agent" id="agentMsg1">
+          <div class="msg-avatar mono">AS</div>
+          <div class="bubble">
+            <div>Đang phân tích cây AST và chạy công cụ phân tích tĩnh trong môi trường cách ly:</div>
+            <div class="agent-plan-card mono">
+              <div class="subtask-item">
+                <span class="st-status st-done" id="st1">✓</span>
+                <span>[AST Graph] Đọc tệp <code style="color:#38bdf8;">src/auth/session.ts</code></span>
+              </div>
+              <div class="subtask-item">
+                <span class="st-status st-done" id="st2">✓</span>
+                <span>[Semgrep Engine] Phát hiện insecure sync token fallback tại line 42</span>
+              </div>
+              <div class="subtask-item">
+                <span class="st-status st-warn" id="st3">!</span>
+                <span>[Hard Floor Gate] Thao tác ghi file đè yêu cầu phê duyệt trực tiếp từ bạn</span>
+              </div>
+            </div>
+
+            <!-- Code Diff Box -->
+            <div class="diff-box mono" id="diffCard" style="display: none;">
+              <div class="diff-head">
+                <span>diff: src/auth/session.ts</span>
+                <span style="color:#10b981;">+14 / -6 lines</span>
+              </div>
+              <div class="diff-code">
+                <div class="del-line">- session.regenerateId(); // insecure sync token</div>
+                <div class="add-line">+ await crypto.regenerateSessionToken({ strictTtl: true, domainIsolation: true });</div>
+                <div style="color: #64748b; font-style: italic; margin-top: 4px;">// Tái tạo token cryptographically secure theo khuyến nghị NIST</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message 3: Execution Result -->
+        <div class="msg-row msg-agent" id="agentMsg2">
+          <div class="msg-avatar mono">AS</div>
+          <div class="bubble" style="border-color: #10b981; background: rgba(16, 185, 129, 0.06);">
+            <span style="color: #10b981; font-weight: 700;">✓ Phê duyệt đã được xác nhận.</span>
+            Đã áp dụng bản vá thành công vào <code style="color:#38bdf8;">src/auth/session.ts</code>. Chạy lại bộ kiểm thử tự động: <b>142 tests passed (100% green)</b>. Ghi nhận nhật ký vào cryptographic audit ledger.
+          </div>
+        </div>
+      </div>
+
+      <!-- Composer Input -->
+      <div class="composer">
+        <div class="composer-input-wrap" id="composerBox">
+          <span id="composerText"></span>
+          <span class="cursor-blink" id="cursorBlink"></span>
+        </div>
+        <button class="btn-send mono" id="sendBtn">
+          <span>Gửi</span> <span>→</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Right Inspector -->
+    <aside class="inspector">
+      <div class="insp-title mono">
+        <span>🔒 Access Control & Safety</span>
+      </div>
+
+      <!-- Human Approval Card -->
+      <div class="approval-card" id="approvalCard">
+        <span class="appr-badge mono">CẦN PHÊ DUYỆT (HIGH RISK)</span>
+        <div class="appr-head">Ghi đè file mã nguồn</div>
+        <div class="appr-desc">Astra tạo bản vá cho session.ts. Cơ chế Hard Floor yêu cầu bạn phê duyệt trước khi ghi đè vào ổ cứng.</div>
+        <div class="appr-actions mono">
+          <button class="btn-deny">Từ Chối</button>
+          <button class="btn-approve" id="approveBtn">✓ Chấp Thuận</button>
+        </div>
+      </div>
+
+      <!-- Audit Stream -->
+      <div style="margin-top: auto; padding: 14px; background: #070a12; border: 1px solid #1e293b; border-radius: 8px; font-size: 11px;" class="mono">
+        <div style="color: #64748b; margin-bottom: 8px;">AUDIT LEDGER</div>
+        <div style="color: #10b981;">• [14:22:04] read src/auth/session.ts (auto)</div>
+        <div style="color: #10b981;">• [14:22:08] exec semgrep rule (auto)</div>
+        <div style="color: #f59e0b;" id="auditEntryPending">• [14:22:12] write session.ts (wait approval)</div>
+        <div style="color: #10b981; display: none;" id="auditEntryDone">• [14:22:15] write session.ts (user approved)</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Virtual Animated Mouse Cursor -->
+<div class="cursor-hand" id="virtualCursor" style="top: 790px; left: 620px;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5.5 3.2L18.8 12.2L12.5 13.5L16.2 20.8L13.5 22.2L9.8 15L5.5 19.2V3.2Z" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+  </svg>
+</div>
+
+<!-- Bottom Status HUD -->
+<div class="hud-banner mono" id="hudBanner">
+  <span class="hud-icon"></span>
+  <span class="hud-title" id="hudTitle">BƯỚC 1: NHẬP YÊU CẦU</span>
+  <span class="hud-desc" id="hudDesc">Người dùng giao nhiệm vụ cho Astra qua thanh Composer</span>
+</div>
+
+<script>
+// Orchestrated Demo Animation Script
+const PROMPT_TEXT = "Quét mã nguồn xác thực, tìm lỗ hổng Session Fixation và tạo bản vá bảo mật chuẩn NIST.";
+
+const composerBox = document.getElementById('composerBox');
+const composerText = document.getElementById('composerText');
+const sendBtn = document.getElementById('sendBtn');
+const cursor = document.getElementById('virtualCursor');
+const userMsg = document.getElementById('userMsg');
+const agentMsg1 = document.getElementById('agentMsg1');
+const agentMsg2 = document.getElementById('agentMsg2');
+const diffCard = document.getElementById('diffCard');
+const approvalCard = document.getElementById('approvalCard');
+const approveBtn = document.getElementById('approveBtn');
+const navInboxCount = document.getElementById('navInboxCount');
+const auditEntryPending = document.getElementById('auditEntryPending');
+const auditEntryDone = document.getElementById('auditEntryDone');
+const hudTitle = document.getElementById('hudTitle');
+const hudDesc = document.getElementById('hudDesc');
+
+function moveCursor(x, y, duration = 600) {
+  cursor.style.transition = `all ${duration}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
+  cursor.style.left = x + 'px';
+  cursor.style.top = y + 'px';
+  return new Promise(res => setTimeout(res, duration));
+}
+
+function sleep(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+async function runDemoSequence() {
+  // Reset state
+  userMsg.classList.remove('visible');
+  agentMsg1.classList.remove('visible');
+  agentMsg2.classList.remove('visible');
+  diffCard.style.display = 'none';
+  approvalCard.classList.remove('active');
+  navInboxCount.style.display = 'none';
+  auditEntryPending.style.display = 'block';
+  auditEntryDone.style.display = 'none';
+  composerText.textContent = '';
+  composerBox.classList.remove('focused');
+
+  // Step 1: Click into Composer
+  hudTitle.textContent = "BƯỚC 1: NHẬP NHIỆM VỤ";
+  hudDesc.textContent = "Gõ yêu cầu vào thanh Smart Composer native";
+  await moveCursor(640, 810, 800);
+  composerBox.classList.add('focused');
+  await sleep(400);
+
+  // Step 2: Type prompt character by character
+  for (let i = 0; i <= PROMPT_TEXT.length; i++) {
+    composerText.textContent = PROMPT_TEXT.slice(0, i);
+    await sleep(28);
+  }
+  await sleep(300);
+
+  // Step 3: Move cursor to Send Button and Click
+  await moveCursor(1190, 810, 500);
+  sendBtn.style.transform = 'scale(0.95)';
+  await sleep(150);
+  sendBtn.style.transform = 'scale(1)';
+
+  // Send message
+  composerText.textContent = '';
+  composerBox.classList.remove('focused');
+  userMsg.classList.add('visible');
+
+  // Step 4: Agent Reasoning & Subtask breakdown
+  hudTitle.textContent = "BƯỚC 2: PHÂN TÍCH & THỰC THI";
+  hudDesc.textContent = "Astra suy luận, quét AST và tự động phát hiện lỗ hổng";
+  await moveCursor(750, 480, 700);
+  await sleep(600);
+  agentMsg1.classList.add('visible');
+  await sleep(800);
+
+  // Step 5: Reveal Diff & Trigger Approval
+  hudTitle.textContent = "BƯỚC 3: CỔNG AN TOÀN HARD FLOOR";
+  hudDesc.textContent = "Astra sinh bản vá chuẩn nhưng dừng lại yêu cầu con người phê duyệt";
+  diffCard.style.display = 'block';
+  approvalCard.classList.add('active');
+  navInboxCount.style.display = 'inline-block';
+  await sleep(800);
+
+  // Step 6: Move cursor to Human Approval button
+  await moveCursor(1440, 260, 900);
+  await sleep(500);
+  approveBtn.classList.add('clicked');
+  await sleep(200);
+  approveBtn.classList.remove('clicked');
+  approveBtn.textContent = '✓ Đã Phê Duyệt';
+  approveBtn.style.background = '#059669';
+
+  // Step 7: Completed deliverable & Audit
+  hudTitle.textContent = "BƯỚC 4: THÀNH PHẨM HOÀN TẤT";
+  hudDesc.textContent = "Áp dụng bản vá, chạy test 100% green và ghi nhật ký kiểm toán";
+  approvalCard.classList.remove('active');
+  navInboxCount.style.display = 'none';
+  auditEntryPending.style.display = 'none';
+  auditEntryDone.style.display = 'block';
+  await sleep(400);
+  agentMsg2.classList.add('visible');
+
+  // Move cursor away and hold result
+  await moveCursor(850, 500, 1000);
+  await sleep(3000);
+}
+
+// Start sequence automatically on load
+window.addEventListener('load', () => {
+  runDemoSequence();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/ibm-plex-sans";
+
+/* Tailwind layer — utilities for the mock-parity restyle. Imported before styles.css so the
+   app's existing base rules still win on surfaces not yet ported to utility classes. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
