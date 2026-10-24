@@ -17,10 +17,6 @@
   <img src="https://img.shields.io/badge/MCP-compatible-amber.svg?style=flat-square" alt="MCP Compatible" />
 </p>
 
-<p align="center">
-  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPhongTran-code%2FAstra_AI&project-name=astra-landing&root-directory=landing"><img src="https://vercel.com/button" alt="Deploy Landing Page with Vercel" /></a>
-</p>
-
 ---
 
 **Astra** is an open-source, local-first desktop AI coworker designed to deliver **finished work**, not just conversation. Running directly on your machine, Astra reviews code, audits systems, drafts deliverables, coordinates multi-agent teams, and interacts with your files, shell, and external tools—all governed by strict architectural safety boundaries.
@@ -63,7 +59,7 @@ Astra implements safety as an architectural hard floor, not a prompt suggestion:
 
 ### 4. Bring Your Own Model (BYOM) & Sovereign Privacy
 Switch model providers instantly per conversation or per agent:
-- **Cloud Providers**: OpenAI (GPT-4o, o1, o3), Anthropic (Claude 3.5 Sonnet, 3.7 Sonnet), Google Gemini (Gemini 2.0 Flash / Pro), xAI (Grok), DeepSeek (V3, R1), Qwen, Mistral, Moonshot Kimi, BytePlus Ark.
+- **Cloud Providers**: OpenAI, Anthropic, Google Gemini, xAI, DeepSeek, Qwen, Mistral, Moonshot Kimi, BytePlus Ark...
 - **Local / Offline Models**: Direct integration with **Ollama** and local OpenAI-compatible endpoints with zero data egress.
 
 ---
@@ -135,16 +131,12 @@ npm run tauri dev
 ```
 *(To run only the web browser interface without Tauri, use `npm run dev` instead).*
 
-### Step 4: Preview or Deploy Landing Page
+### Step 4: Preview Landing Page
 To run the marketing & simulator website locally:
 ```bash
 python3 -m http.server 3000 --directory landing
 ```
 Visit `http://localhost:3000` or `http://localhost:3000/simulator.html`.
-
-Deploy the landing page directly to **Vercel** with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPhongTran-code%2FAstra_AI&project-name=astra-landing&root-directory=landing)
 
 ---
 
@@ -189,19 +181,22 @@ The [GitHub Actions workflow](.github/workflows/release.yml) can also be run man
 ## 📂 Repository Map
 
 ```text
-coworker/                 Python agent runtime, coordinator, persistence, permissions
-coworker/teams/           Multi-agent teams, routing, sandbox, and context boundaries
-coworker/server/          FastAPI application and session manager
-coworker/providers/       Model providers, capability routing, and fallback handling
-coworker/connectors/      External platform integrations (GitHub, Slack, Jira, etc.)
-coworker/tools/           Governed filesystem, shell, git, web, and MCP tools
-surfaces/gui/             Desktop frontend (React 18, TypeScript, TailwindCSS/Vanilla)
-surfaces/gui/src-tauri/   Tauri v2 desktop shell, window controls, and sidecar supervisor
-stt/                      Speech-to-text Rust sidecar
-landing/                  Product landing page and media showcase
-packaging/                Cross-platform build scripts and release automation
-tests/                    Backend test suite (unit, integration, and security gates)
-docs/                     Architecture specifications, developer references, and design docs
+coworker/                 Python package and agent runtime (permissions, reviewer, risk, secrets)
+coworker/teams/           Team domain, contracts, persistence, routing, runtime, permissions, sandbox
+coworker/server/          FastAPI application and local server/session management
+coworker/providers/       Model-provider implementations and capability routing
+coworker/connectors/      External integrations, identities, relays, and senders
+coworker/automation/      Scheduled and event-triggered work
+coworker/tools/           Governed local file, shell, git, web, MCP, and agent tools
+coworker/memory/          Memory stores and memory tools
+surfaces/gui/             React 18 + TypeScript GUI and Playwright E2E suites
+surfaces/gui/src-tauri/   Tauri v2 desktop shell and sidecar process supervision
+stt/                      Rust speech-to-text sidecar
+landing/                  Product landing page and interactive simulator
+packaging/                Dev bootstrap, PyInstaller specs, installers, and update manifests
+tests/                    Python backend, integration, and security gate test suites
+plan/                     Target architecture and implementation plans
+docs/                     Architecture specifications, operational references, and decision records
 ```
 
 ---
