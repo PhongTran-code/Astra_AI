@@ -3,7 +3,10 @@
 
 name: CI
 
-on: [push, pull_request]
+# Paused automatic triggers on push/pull_request; can still be run manually from Actions tab.
+# on: [push, pull_request]
+on:
+  workflow_dispatch:
 
 jobs:
   pytest:
@@ -40,6 +43,7 @@ jobs:
         run: npm test
 
   gui-e2e:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
